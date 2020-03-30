@@ -196,7 +196,7 @@
             <h2 id="realloc-hook"><a href="#realloc-hook" class="headerlink" title="realloc_hook"></a>realloc_hook</h2><blockquote>
 <p>有时one_gadget因为环境原因全都不可用，这时可以通过realloc_hook来调整堆栈环境。  </p>
 </blockquote>
-<p><img src="/source/realloc_hook.png" alt="">  </p>
+<p><img src="realloc_hook.png" alt="xxx">  </p>
 <p>将realloc_hook设置为选好的one_gadget，malloc_hook设置为如图某条push指令  </p>
 <blockquote>
 <p>注意sub rsp,0x18  </p>
@@ -207,9 +207,9 @@
 <p>main_arena储存在libc.so.6的.data段，通过这个偏移我们可以获取libc基地址。  </p>
 </blockquote>
 <p>将libc.so.6拖入IDA中，找到malloc_trim()函数    </p>
-<p><img src="/source/malloc_trim().png" alt=""></p>
+<p><img src="malloc_trim().png" alt=""></p>
 <p>__malloc_trim源码  </p>
-<p><img src="/source/__malloc_trim.png" alt="">  </p>
+<p><img src="__malloc_trim.png" alt="">  </p>
 <h2 id="强行加载不同版本glibc"><a href="#强行加载不同版本glibc" class="headerlink" title="强行加载不同版本glibc"></a>强行加载不同版本glibc</h2><p><a href="https://github.com/ray-cp/pwn_debug" target="_blank" rel="noopener">pwn_debug</a>  </p>
 <h2 id="通过environ环境变量改写main返回地址"><a href="#通过environ环境变量改写main返回地址" class="headerlink" title="通过environ环境变量改写main返回地址"></a>通过environ环境变量改写main返回地址</h2><blockquote>
 <p>在历史上，大多数unix系统都支持main函数带三个参数，其中第三个参数就是表示环境表的地址，在glibc中储存程序运行需要的环境变量。<br>int main(int argc,char *argv[],char *envp)  </p>
