@@ -106,6 +106,15 @@
         
         <section class="post-content">
             <h3 id="二进制安全爱好者"><a href="#二进制安全爱好者" class="headerlink" title="二进制安全爱好者"></a>二进制安全爱好者</h3><h3 id="就读于桂林电子科技大学GUET"><a href="#就读于桂林电子科技大学GUET" class="headerlink" title="就读于桂林电子科技大学GUET"></a>就读于桂林电子科技大学GUET</h3>
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"787cc455593c1fb9cfcd","clientSecret":"f6abba3d9cc77878426ee16aa8bcb980fd3cd70c","repo":"s1vona.github.io","owner":"s1vona","admin":["s1vona"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
         </section>
     </article>
 </div>
