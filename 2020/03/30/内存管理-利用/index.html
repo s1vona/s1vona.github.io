@@ -455,9 +455,15 @@
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">victim = av-&gt;top;</span><br><span class="line">size   = chunksize(victim);</span><br><span class="line">remainder_size = size - nb;</span><br><span class="line">set_head(remainder, remainder_size | PREV_INUSE);</span><br></pre></td></tr></table></figure>
 
 <p>所以，如果我们想要下次在指定位置分配大小为 x 的 chunk，我们需要确保 remainder_size 不小于 x+ MINSIZE。</p>
-<h2 id="举个栗子-2"><a href="#举个栗子-2" class="headerlink" title="举个栗子"></a>举个栗子</h2><hr>
+<h2 id="举个栗子-2"><a href="#举个栗子-2" class="headerlink" title="举个栗子"></a>举个栗子</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">long</span> *ptr,*ptr2;</span><br><span class="line">    ptr=<span class="built_in">malloc</span>(<span class="number">0x10</span>);</span><br><span class="line">    ptr=(<span class="keyword">long</span> *)(((<span class="keyword">long</span>)ptr)+<span class="number">24</span>);</span><br><span class="line">    *ptr=<span class="number">-1</span>;        <span class="comment">// &lt;=== 这里把top chunk的size域改为0xffffffffffffffff</span></span><br><span class="line">    <span class="built_in">malloc</span>(<span class="number">-4120</span>);  <span class="comment">// &lt;=== 减小top chunk指针 修改malloc@got</span></span><br><span class="line">    <span class="built_in">malloc</span>(<span class="number">0x10</span>);   <span class="comment">// &lt;=== 分配块实现任意地址写</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<hr>
 <p>csgo实在太好玩了咕咕咕<br>卡托实在太好看了咕咕咕<br>cod16实在太爽了咕咕咕<br>glibc的源码还是要看的啊  </p>
-<p>大部分是复制粘贴<br>写得十分垃圾  </p>
+<p>大部分是复制粘贴<br>写得十分垃圾<br>从头到尾算是学习内存管理的记录吧。</p>
 <h1 id="reference"><a href="#reference" class="headerlink" title="reference"></a>reference</h1><p>glibc内存管理ptmalloc源代码分析.pdf ————-华庭（庄明强）2011/4/17  </p>
 <p><a href="https://ctf-wiki.github.io/ctf-wiki/pwn/linux/glibc-heap/introduction-zh/" target="_blank" rel="noopener">ctf wiki</a>  </p>
 
