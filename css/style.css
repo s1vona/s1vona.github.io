@@ -1310,3 +1310,16 @@ header label {
 .highlight .code .strong {
   font-weight: bold;
 }
+.gutter {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -khtml-user-select: none;
+}
+.footer {
+  height: 3rem;
+  line-height: 1.2rem;
+}
+footer {
+  text-align: right;
+}
