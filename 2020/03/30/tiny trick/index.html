@@ -211,10 +211,15 @@
 <p>__malloc_trim源码  </p>
 <p><img src="https://s1.ax1x.com/2020/03/31/GuIT4U.png" alt="">  </p>
 <h2 id="强行加载不同版本glibc"><a href="#强行加载不同版本glibc" class="headerlink" title="强行加载不同版本glibc"></a>强行加载不同版本glibc</h2><p><a href="https://github.com/ray-cp/pwn_debug" target="_blank" rel="noopener">pwn_debug</a>  </p>
+<p><a href="https://github.com/skysider/pwndocker" target="_blank" rel="noopener">pwndocker</a></p>
 <h2 id="通过environ环境变量改写main返回地址"><a href="#通过environ环境变量改写main返回地址" class="headerlink" title="通过environ环境变量改写main返回地址"></a>通过environ环境变量改写main返回地址</h2><blockquote>
 <p>在历史上，大多数unix系统都支持main函数带三个参数，其中第三个参数就是表示环境表的地址，在glibc中储存程序运行需要的环境变量。<br>int main(int argc,char *argv[],char *envp)  </p>
 </blockquote>
 <p>通过 <strong>libc.symbols[‘__environ’]</strong> 找到environ变量在glibc中的地址，从而确定main函数在栈中的返回地址。<br><img src="https://s1.ax1x.com/2020/03/31/GuI4H0.png" alt=""></p>
+<h2 id="scanf-amp-printf"><a href="#scanf-amp-printf" class="headerlink" title="scanf &amp; printf"></a>scanf &amp; printf</h2><p>scanf输入大量字符会调用malloc和free</p>
+<p>scanf(“%d”)输入+、- 不会更改栈上的值(比如绕过canary</p>
+<p>printf(“%10000c”,x) 当宽度过大时会调用malloc和free</p>
+<h2 id="seccomp会调用calloc"><a href="#seccomp会调用calloc" class="headerlink" title="seccomp会调用calloc"></a>seccomp会调用calloc</h2><p>pass</p>
 
 <div id="gitalk-container"></div>
 <script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>

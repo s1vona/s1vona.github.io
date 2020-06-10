@@ -232,7 +232,11 @@
 <p><img src="https://s1.ax1x.com/2020/05/13/YdNnkn.png" alt=""></p>
 <p><img src="https://s1.ax1x.com/2020/05/13/YdN2tI.png" alt=""></p>
 <p>之后修改eip的值为0x4016FE防止程序退出，然后继续F9执行，重复上图的操作，得到剩下的值</p>
-<p>python angr…….</p>
+<p>使用angr</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="keyword">import</span> angr</span><br><span class="line"></span><br><span class="line">p = angr.Project(<span class="string">'./signal.exe'</span>)   <span class="comment">#指定angr跑的程序</span></span><br><span class="line">state = p.factory.entry_state()    <span class="comment">#新建一个SimState的对象，得到一个初始化到二进制入口函数的SimState对象。</span></span><br><span class="line">simgr = p.factory.simgr(state)   <span class="comment">#创建simulation manager，angr的主要入口</span></span><br><span class="line"></span><br><span class="line">simgr.explore(find=<span class="number">0x004017A5</span> ,avoid=<span class="number">0x004016E6</span>)  <span class="comment">#争取跑到输出成功的地址，避免跑到输出wrong的地址</span></span><br><span class="line">flag = simgr.found[<span class="number">0</span>].posix.dumps(<span class="number">0</span>)[:<span class="number">15</span>]     <span class="comment">#得到flag</span></span><br><span class="line">print(flag)</span><br></pre></td></tr></table></figure>
+
+
+
 <h2 id="pwn"><a href="#pwn" class="headerlink" title="pwn"></a>pwn</h2><h3 id="boom2"><a href="#boom2" class="headerlink" title="boom2"></a>boom2</h3><p>先开一下开了什么保护</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Arch:     amd64-64-little</span><br><span class="line">RELRO:    Full RELRO</span><br><span class="line">Stack:    Canary found</span><br><span class="line">NX:       NX enabled</span><br><span class="line">PIE:      PIE enabled</span><br></pre></td></tr></table></figure>
 
