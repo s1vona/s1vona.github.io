@@ -205,7 +205,7 @@
 </li>
 <li><p>修改size从而修改tc_idx</p>
 </li>
-<li><p><a href="https://github.com/shellphish/how2heap/blob/master/glibc_2.26/house_of_botcake.c" target="_blank" rel="noopener">house of botcake</a>：合并chunk1 chunk2进unsortedbins，将chunk2链进tcache，分配一个大chunk造成overlapped修改fd</p>
+<li><p><a href="https://github.com/shellphish/how2heap/blob/master/glibc_2.26/house_of_botcake.c" target="_blank" rel="noopener">house of botcake</a>：合并chunk1 chunk2进unsortedbins，将chunk2链进tcache，从chunk1分配一个大chunk造成overlapped到chunk2修改其fd</p>
 </li>
 <li><p><a href="https://github.com/shellphish/how2heap/blob/master/glibc_2.26/fastbin_reverse_into_tcache.c" target="_blank" rel="noopener">fastbin_reverse_into_tcache</a></p>
 </li>
