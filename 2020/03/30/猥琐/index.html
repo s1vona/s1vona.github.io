@@ -220,6 +220,14 @@
 <p>scanf(“%d”)输入+、- 不会更改栈上的值(比如绕过canary</p>
 <p>printf(“%10000c”,x) 当宽度过大时会调用malloc和free</p>
 <h2 id="seccomp会调用calloc"><a href="#seccomp会调用calloc" class="headerlink" title="seccomp会调用calloc"></a>seccomp会调用calloc</h2><p>pass</p>
+<h2 id="绕过seccomp沙盒保护"><a href="#绕过seccomp沙盒保护" class="headerlink" title="绕过seccomp沙盒保护"></a>绕过seccomp沙盒保护</h2><h3 id="未检查arch"><a href="#未检查arch" class="headerlink" title="未检查arch"></a>未检查arch</h3><p>当未检查arch参数时，可以尝试转换当前的处理器模式。</p>
+<p>i386和x86-64拥有有不同的系统调用号，例如在x86_64下禁用了0x3b(execve)号系统调用，那么可以欺骗cpu目前在运行i386的程序，那么就可以使用系统调用号0xb(i386下的execve)，当然要求0xb不在黑名单中。</p>
+<figure class="highlight arm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">to32</span>:                           </span><br><span class="line">    <span class="keyword">mov </span>DWORD [rsp+<span class="number">4</span>],<span class="number">0x23</span>      <span class="comment">;;将CPU模式转换为32位</span></span><br><span class="line">    retf                        <span class="comment">;;pop cs:eip</span></span><br><span class="line"><span class="symbol">to64</span>:                           </span><br><span class="line">    <span class="keyword">mov </span>DWORD [esp+<span class="number">4</span>],<span class="number">0x33</span>      <span class="comment">;;将CPU模式转换为64位</span></span><br><span class="line">    retf                        <span class="comment">;;pop cs:eip</span></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="x64下使用X32"><a href="#x64下使用X32" class="headerlink" title="x64下使用X32"></a>x64下使用X32</h3><p>如果开启了arch检查，使用X32的方式绕过。</p>
+<p>X32为x86-64下的一种特殊的模式，它只工作在原来为64位的程序下，它使用64位的寄存器和32位的地址，此时nr会在原来的基础上加上__X32_SYSCALL_BIT (0X40000000)，即原本的sys_number + 0x40000000，这会达到一样的效果。</p>
+<h3 id="reference"><a href="#reference" class="headerlink" title="reference"></a>reference</h3><p><a href="https://blog.betamao.me/2019/01/23/Linux沙箱之seccomp/" target="_blank" rel="noopener">https://blog.betamao.me/2019/01/23/Linux沙箱之seccomp/</a></p>
 
 <div id="gitalk-container"></div>
 <script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
