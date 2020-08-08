@@ -389,10 +389,7 @@
 <h2 id="利用"><a href="#利用" class="headerlink" title="利用"></a>利用</h2><h3 id="tcache-poisoning"><a href="#tcache-poisoning" class="headerlink" title="tcache poisoning"></a>tcache poisoning</h3><p>通过覆盖 tcache 中的 next，不需要伪造任何 chunk 结构即可实现 malloc 到任何地址。<br>类似于fastbin attack 并且不需要size的限制。  </p>
 <h3 id="tcache-dup"><a href="#tcache-dup" class="headerlink" title="tcache dup"></a>tcache dup</h3><p>类似 fastbin dup，不过利用的是 tcache_put() 的不严谨<br>因为没有任何检查，所以我们可以对同一个 chunk 多次 free，造成 cycliced list。</p>
 <h3 id="smallbin-unlink"><a href="#smallbin-unlink" class="headerlink" title="smallbin unlink"></a>smallbin unlink</h3><p>在 smallbin 中包含有空闲块的时候，会同时将同大小的其他空闲块，放入 tcache 中，此时也会出现解链操作，但相比于 unlink 宏，缺少了链完整性校验。因此，原本 unlink 操作在该条件下也可以使用。  </p>
-<h1 id="unlink-wdnmd"><a href="#unlink-wdnmd" class="headerlink" title="unlink wdnmd"></a>unlink wdnmd</h1><blockquote>
-<p>为什么这么说呢<br>第一次接触unlink是在<strong>wectf</strong>^_^ 当初学习这个利用方法时就没看懂<br>后来遇到了很多利用unlink的题目，想去看但。。。(其实看了很多遍还是不懂<br>刚才试着做了一下去年的国赛线下题目<br>又遇到unlink<br>于是发粪涂墙XD  </p>
-</blockquote>
-<ul>
+<h1 id="unlink"><a href="#unlink" class="headerlink" title="unlink"></a>unlink</h1><ul>
 <li>unlink是在free时会进行的操作  </li>
 <li>向前合并或向后合并  </li>
 <li>对nextchunk进行unlink  </li>
