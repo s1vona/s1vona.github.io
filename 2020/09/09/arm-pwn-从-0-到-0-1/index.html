@@ -197,7 +197,8 @@
 <h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><h3 id="安装qemu"><a href="#安装qemu" class="headerlink" title="安装qemu"></a>安装qemu</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt-get install qemu</span><br></pre></td></tr></table></figure>
 
 <p>不同系统安装方式不同，一般来说只需要用到用户模式</p>
-<p>或者使用arm_now <a href="https://github.com/nongiach/arm_now" target="_blank" rel="noopener">https://github.com/nongiach/arm_now</a></p>
+<p>ubuntu16里的qemu版本过低会导致gdb调试64位时报错</p>
+<p>或者可以使用arm_now <a href="https://github.com/nongiach/arm_now" target="_blank" rel="noopener">https://github.com/nongiach/arm_now</a></p>
 <h3 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install -y gcc-arm-linux-gnueabi</span><br><span class="line">sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu</span><br></pre></td></tr></table></figure>
 
 <h2 id="简单了解arm"><a href="#简单了解arm" class="headerlink" title="简单了解arm"></a>简单了解arm</h2><h3 id="32位"><a href="#32位" class="headerlink" title="32位"></a>32位</h3><h4 id="函数调用"><a href="#函数调用" class="headerlink" title="函数调用"></a>函数调用</h4><ul>
