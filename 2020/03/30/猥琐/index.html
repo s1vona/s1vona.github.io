@@ -228,6 +228,15 @@
 <h3 id="x64下使用X32"><a href="#x64下使用X32" class="headerlink" title="x64下使用X32"></a>x64下使用X32</h3><p>如果开启了arch检查，使用X32的方式绕过。</p>
 <p>X32为x86-64下的一种特殊的模式，它只工作在原来为64位的程序下，它使用64位的寄存器和32位的地址，此时nr会在原来的基础上加上__X32_SYSCALL_BIT (0X40000000)，即原本的sys_number + 0x40000000，这会达到一样的效果。</p>
 <h3 id="reference"><a href="#reference" class="headerlink" title="reference"></a>reference</h3><p><a href="https://blog.betamao.me/2019/01/23/Linux沙箱之seccomp/" target="_blank" rel="noopener">https://blog.betamao.me/2019/01/23/Linux沙箱之seccomp/</a></p>
+<h2 id="magic-gadgets"><a href="#magic-gadgets" class="headerlink" title="magic gadgets"></a>magic gadgets</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; x&#x2F;10xi 0x0000000000400618</span><br><span class="line">   0x400618 &lt;__do_global_dtors_aux+24&gt;:	add    DWORD PTR [rbp-0x3d],ebx</span><br><span class="line">   0x40061b &lt;__do_global_dtors_aux+27&gt;:	nop    DWORD PTR [rax+rax*1+0x0]</span><br><span class="line">   0x400620 &lt;__do_global_dtors_aux+32&gt;:	repz ret</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这是一个在栈溢出时很好用的gadget，通过csu中的通用gadgets可以控制rbx，在使用one_gadget时加上参数-l 2，可以找到一个要求r12 r14为0的rce，因为csu我们可以轻易控制这俩参数，十分好用。甚至不需要leak就可以getshell，如果Partial RELRO 那么直接add GOT 通过计算偏移修改为rce；如果Full RELRO，那么通过返回到libc_start_main会在栈上写入libc地址也可以利用。cscctf_2019_quals_signal</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">0x7ffff7f197a0 &lt;getkeyserv_handle+576&gt;:	mov    rdx,QWORD PTR [rdi+0x8]</span><br><span class="line">0x7ffff7f197a4 &lt;getkeyserv_handle+580&gt;:	mov    QWORD PTR [rsp],rax</span><br><span class="line">0x7ffff7f197a8 &lt;getkeyserv_handle+584&gt;:	call   QWORD PTR [rdx+0x20]</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这是一个存在与glibc2.31的gadget，因为在此版本的setcontext参数被改为了rdx，那么可以通过这个gadget再次实现利用。2020_GACTF_card。另外提一下glibc2.29后vtable可写</p>
+</blockquote>
+<h3 id="reference-1"><a href="#reference-1" class="headerlink" title="reference"></a>reference</h3><p><a href="https://publicki.top/2020/06/17/cscctf_2019_qual_signal/" target="_blank" rel="noopener">https://publicki.top/2020/06/17/cscctf_2019_qual_signal/</a></p>
 
 <div id="gitalk-container"></div>
 <script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
