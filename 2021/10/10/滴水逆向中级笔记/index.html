@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Sivona">
+
+
+
+
+
+<title>滴水逆向中级笔记 | Sivona&#39;s</title>
+
+
+
+    <link rel="icon" href="/bug.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Sivona&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Sivona&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">滴水逆向中级笔记</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Sivona</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">October 10, 2021&nbsp;&nbsp;15:22:57</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/note/">note</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <blockquote>
+<p>本篇文章为个人学习笔记，可能不适合正常人看</p>
+<p>持续更新中···</p>
+<p>基于滴水逆向中级班补充了部分64位的内容</p>
+<p>很多数据结构源于win10 1511</p>
+</blockquote>
+<h1 id="保护模式"><a href="#保护模式" class="headerlink" title="保护模式"></a>保护模式</h1><h1 id="系统调用"><a href="#系统调用" class="headerlink" title="系统调用"></a>系统调用</h1><h2 id="API-3环进0环"><a href="#API-3环进0环" class="headerlink" title="API 3环进0环"></a>API 3环进0环</h2><h3 id="KUSER-SHARED-DATA"><a href="#KUSER-SHARED-DATA" class="headerlink" title="_KUSER_SHARED_DATA"></a>_KUSER_SHARED_DATA</h3><ul>
+<li>用于用户态和内核态共享数据</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">.text:000000018009CE20 4C 8B D1                          mov     r10, rcx        ; NtReadFile</span><br><span class="line">.text:000000018009CE23 B8 06 00 00 00                    mov     eax, 6</span><br><span class="line">.text:000000018009CE28 F6 04 25 08 03 FE+                test    byte ptr ds:7FFE0308h, 1 ; 判断CPU是否支持快速系统调用</span><br><span class="line">.text:000000018009CE28 7F 01</span><br><span class="line">.text:000000018009CE30 75 03                             jnz     short loc_18009CE35 ; Jump if Not Zero (ZF&#x3D;0)</span><br><span class="line">.text:000000018009CE32 0F 05                             syscall                 ; Low latency system call</span><br><span class="line">.text:000000018009CE34 C3                                retn                    ; Return Near from Procedure</span><br><span class="line">.text:000000018009CE35                   ; ---------------------------------------------------------------------------</span><br><span class="line">.text:000000018009CE35</span><br><span class="line">.text:000000018009CE35                   loc_18009CE35:                          ; CODE XREF: NtReadFile+10↑j</span><br><span class="line">.text:000000018009CE35 CD 2E                             int     2Eh             ; DOS 2+ internal - EXECUTE COMMAND</span><br><span class="line">.text:000000018009CE35                                                           ; DS:SI -&gt; counted CR-terminated command string</span><br><span class="line">.text:000000018009CE37 C3                                retn                    ; Return Near from Procedure</span><br></pre></td></tr></table></figure>
+
+<p>windbg中查看：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">2:002&gt; dt _KUSER_SHARED_DATA 7FFE0000 SystemCall</span><br><span class="line">ntdll!_KUSER_SHARED_DATA</span><br><span class="line">   +0x308 SystemCall : 0</span><br></pre></td></tr></table></figure>
+
+<h3 id="修改寄存器"><a href="#修改寄存器" class="headerlink" title="修改寄存器"></a>修改寄存器</h3><ol>
+<li>cs的权限从3变为0</li>
+<li>ss与cs权限永远一致，即ss权限也变为0 </li>
+<li>权限发生切换，栈也一定需要切换，需要新的esp</li>
+<li>进0环后代码的位置，需要新的eip</li>
+</ol>
+<h3 id="中断进0环"><a href="#中断进0环" class="headerlink" title="中断进0环"></a>中断进0环</h3><ul>
+<li>固定中断号为0x2e</li>
+<li>cs eip 由IDT提供，esp ss 由TSS提供</li>
+<li>进入0环后执行的内核函数：nt!KiSystemService</li>
+</ul>
+<h3 id="sysenter进0环"><a href="#sysenter进0环" class="headerlink" title="sysenter进0环"></a>sysenter进0环</h3><ul>
+<li>cs esp eip由MSR寄存器提供（ss为cs + 8）</li>
+<li>进入0环后执行的内核函数：nt!KiFastCallEntry</li>
+</ul>
+<h3 id="sysenter-和-中断-进0环的区别"><a href="#sysenter-和-中断-进0环的区别" class="headerlink" title="sysenter 和 中断 进0环的区别"></a>sysenter 和 中断 进0环的区别</h3><p>相同点：</p>
+<ul>
+<li>目的都是找到内核态需要的cs ss eip esp</li>
+</ul>
+<p>sysenter/快速调用的优点：</p>
+<ul>
+<li>中断需要的cs eip在IDT表中，需要查内存（ss与esp由TSS提供），速度慢</li>
+<li>如果cpu支持快速系统调用，则会在启动时提前把内核态的cs ss esp eip储存到MSR寄存器中，sysenter执行时，直接交换寄存器的值，速度相对快</li>
+</ul>
+<h3 id="64位syscall"><a href="#64位syscall" class="headerlink" title="64位syscall"></a>64位syscall</h3><p><img src="https://p1.ssl.qhimg.com/t0149995eff6ad6f1be.png" alt=""></p>
+<p><img src="https://p3.ssl.qhimg.com/t01e1fb351bf197cf56.png" alt=""></p>
+<ul>
+<li><p>STAR (0xC0000081) - Ring 0 and Ring 3 Segment bases, as well as SYSCALL EIP. Low 32 bits = SYSCALL EIP, bits 32-47 are kernel segment base, bits 48-63 are user segment base.</p>
+</li>
+<li><p>LSTAR (0xC0000082) - The kernel’s RIP SYSCALL entry for 64 bit software.</p>
+</li>
+<li><p>CSTAR (0xC0000083) - The kernel’s RIP for SYSCALL in compatibility mode.</p>
+</li>
+<li><p>SFMASK (0xC0000084) - The low 32 bits are the SYSCALL flag mask. If a bit in this is set, the corresponding bit in rFLAGS is cleared.</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">kd&gt; rdmsr c0000082</span><br><span class="line">msr[c0000082] &#x3D; fffff803&#96;18159d00</span><br><span class="line">kd&gt; u fffff803&#96;18159d00</span><br><span class="line">nt!KiSystemCall64:</span><br><span class="line">fffff803&#96;18159d00 0f01f8          swapgs</span><br><span class="line">fffff803&#96;18159d03 654889242510000000 mov   qword ptr gs:[10h],rsp</span><br><span class="line">fffff803&#96;18159d0c 65488b2425a8010000 mov   rsp,qword ptr gs:[1A8h]</span><br><span class="line">fffff803&#96;18159d15 6a2b            push    2Bh</span><br><span class="line">fffff803&#96;18159d17 65ff342510000000 push    qword ptr gs:[10h]</span><br><span class="line">fffff803&#96;18159d1f 4153            push    r11</span><br><span class="line">fffff803&#96;18159d21 6a33            push    33h</span><br><span class="line">fffff803&#96;18159d23 51              push    rcx</span><br></pre></td></tr></table></figure>
+
+<h2 id="保存现场"><a href="#保存现场" class="headerlink" title="保存现场"></a>保存现场</h2><h3 id="Ktrap-frame"><a href="#Ktrap-frame" class="headerlink" title="_Ktrap_frame"></a>_Ktrap_frame</h3><p>进入0环后，存入所有用户态的寄存器</p>
+<p>位于kthread中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">0:000&gt; dt _Ktrap_frame</span><br><span class="line">ntdll!_KTRAP_FRAME</span><br><span class="line">   +0x000 DbgEbp           : Uint4B</span><br><span class="line">   +0x004 DbgEip           : Uint4B</span><br><span class="line">   +0x008 DbgArgMark       : Uint4B</span><br><span class="line">   +0x00c TempSegCs        : Uint2B</span><br><span class="line">   +0x00e Logging          : UChar</span><br><span class="line">   +0x00f FrameType        : UChar</span><br><span class="line">   +0x010 TempEsp          : Uint4B</span><br><span class="line">   +0x014 Dr0              : Uint4B</span><br><span class="line">   +0x018 Dr1              : Uint4B</span><br><span class="line">   +0x01c Dr2              : Uint4B</span><br><span class="line">   +0x020 Dr3              : Uint4B</span><br><span class="line">   +0x024 Dr6              : Uint4B</span><br><span class="line">   +0x028 Dr7              : Uint4B</span><br><span class="line">   +0x02c SegGs            : Uint4B</span><br><span class="line">   +0x030 SegEs            : Uint4B</span><br><span class="line">   +0x034 SegDs            : Uint4B</span><br><span class="line">   +0x038 Edx              : Uint4B</span><br><span class="line">   +0x03c Ecx              : Uint4B</span><br><span class="line">   +0x040 Eax              : Uint4B</span><br><span class="line">   +0x044 PreviousPreviousMode : UChar</span><br><span class="line">   +0x045 EntropyQueueDpc  : UChar</span><br><span class="line">   +0x046 NmiMsrIbrs       : UChar</span><br><span class="line">   +0x046 Reserved1        : UChar</span><br><span class="line">   +0x047 PreviousIrql     : UChar</span><br><span class="line">   +0x048 MxCsr            : Uint4B</span><br><span class="line">   +0x04c ExceptionList    : Ptr32 _EXCEPTION_REGISTRATION_RECORD</span><br><span class="line">   +0x050 SegFs            : Uint4B</span><br><span class="line">   +0x054 Edi              : Uint4B</span><br><span class="line">   +0x058 Esi              : Uint4B</span><br><span class="line">   +0x05c Ebx              : Uint4B</span><br><span class="line">   +0x060 Ebp              : Uint4B</span><br><span class="line">   +0x064 ErrCode          : Uint4B</span><br><span class="line">   +0x068 Eip              : Uint4B</span><br><span class="line">   +0x06c SegCs            : Uint4B</span><br><span class="line">   +0x070 EFlags           : Uint4B</span><br><span class="line">   +0x074 HardwareEsp      : Uint4B</span><br><span class="line">   +0x078 HardwareSegSs    : Uint4B</span><br><span class="line">   +0x07c V86Es            : Uint4B</span><br><span class="line">   +0x080 V86Ds            : Uint4B</span><br><span class="line">   +0x084 V86Fs            : Uint4B</span><br><span class="line">   +0x088 V86Gs            : Uint4B</span><br></pre></td></tr></table></figure>
+
+<h3 id="ETHREAD"><a href="#ETHREAD" class="headerlink" title="ETHREAD"></a>ETHREAD</h3><p>描述线程相关状态，其中_KTHREAD相对重要</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">0:000&gt; dt _ETHREAD</span><br><span class="line">ntdll!_ETHREAD</span><br><span class="line">   +0x000 Tcb              : _KTHREAD</span><br><span class="line">   +0x280 CreateTime       : _LARGE_INTEGER</span><br><span class="line">   +0x288 ExitTime         : _LARGE_INTEGER</span><br><span class="line">   +0x288 KeyedWaitChain   : _LIST_ENTRY</span><br><span class="line">   +0x290 ChargeOnlySession : Ptr32 Void</span><br><span class="line">   +0x294 PostBlockList    : _LIST_ENTRY</span><br><span class="line">   +0x294 ForwardLinkShadow : Ptr32 Void</span><br><span class="line">   +0x298 StartAddress     : Ptr32 Void</span><br><span class="line">   +0x29c TerminationPort  : Ptr32 _TERMINATION_PORT</span><br><span class="line">   +0x29c ReaperLink       : Ptr32 _ETHREAD</span><br><span class="line">   +0x29c KeyedWaitValue   : Ptr32 Void</span><br><span class="line">   +0x2a0 ActiveTimerListLock : Uint4B</span><br><span class="line">   +0x2a4 ActiveTimerListHead : _LIST_ENTRY</span><br><span class="line">   +0x2ac Cid              : _CLIENT_ID</span><br><span class="line">   ·</span><br><span class="line">   ·</span><br><span class="line">   ·</span><br></pre></td></tr></table></figure>
+
+<h3 id="KPCR-processor-control-region"><a href="#KPCR-processor-control-region" class="headerlink" title="KPCR(processor control region)"></a>KPCR(processor control region)</h3><p>CPU控制区，描述当前CPU的状态</p>
+<p>查看CPU数量：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dd KeNumberProcessors</span><br></pre></td></tr></table></figure>
+
+<p>查看其他CPU的KPCR： (此处显示结尾地址，应减去相应KPCR结构大小)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dq KiProcessorBlock</span><br></pre></td></tr></table></figure>
+
+<h3 id="KiSystemCall64"><a href="#KiSystemCall64" class="headerlink" title="KiSystemCall64"></a>KiSystemCall64</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">.text:000000014014CD00                   KiSystemCall64  proc near               ; DATA XREF: .pdata:0000000140344818↓o</span><br><span class="line">.text:000000014014CD00                                                           ; KiInitializeBootStructures+12E↓o</span><br><span class="line">.text:000000014014CD00</span><br><span class="line">.text:000000014014CD00                   var_58          &#x3D; byte ptr -58h</span><br><span class="line">.text:000000014014CD00                   var_30          &#x3D; qword ptr -30h</span><br><span class="line">.text:000000014014CD00                   var_28          &#x3D; qword ptr -28h</span><br><span class="line">.text:000000014014CD00                   var_20          &#x3D; qword ptr -20h</span><br><span class="line">.text:000000014014CD00                   var_18          &#x3D; qword ptr -18h</span><br><span class="line">.text:000000014014CD00                   var_10          &#x3D; qword ptr -10h</span><br><span class="line">.text:000000014014CD00                   arg_78          &#x3D; byte ptr  80h</span><br><span class="line">.text:000000014014CD00                   arg_F8          &#x3D; qword ptr  100h</span><br><span class="line">.text:000000014014CD00</span><br><span class="line">.text:000000014014CD00                   ; __unwind &#123; &#x2F;&#x2F; KiSystemServiceHandler</span><br><span class="line">.text:000000014014CD00 0F 01 F8                          swapgs                  ; Exchange GS base with KernelGSBase MSR</span><br><span class="line">.text:000000014014CD03 65 48 89 24 25 10+                mov     gs:10h, rsp</span><br><span class="line">.text:000000014014CD03 00 00 00</span><br><span class="line">.text:000000014014CD0C 65 48 8B 24 25 A8+                mov     rsp, gs:1A8h</span><br><span class="line">.text:000000014014CD0C 01 00 00</span><br><span class="line">.text:000000014014CD15 6A 2B                             push    2Bh ; &#39;+&#39;       ; ss</span><br><span class="line">.text:000000014014CD17 65 FF 34 25 10 00+                push    qword ptr gs:10h ; rsp</span><br><span class="line">.text:000000014014CD17 00 00</span><br><span class="line">.text:000000014014CD1F 41 53                             push    r11             ; eflags</span><br><span class="line">.text:000000014014CD21 6A 33                             push    33h ; &#39;3&#39;       ; cs</span><br><span class="line">.text:000000014014CD23 51                                push    rcx             ; rip</span><br><span class="line">.text:000000014014CD24 49 8B CA                          mov     rcx, r10</span><br><span class="line">.text:000000014014CD27 48 83 EC 08                       sub     rsp, 8          ; Integer Subtraction</span><br><span class="line">.text:000000014014CD2B 55                                push    rbp             ; rbp</span><br><span class="line">.text:000000014014CD2C 48 81 EC 58 01 00+                sub     rsp, 158h       ; rsp &#x3D; _KTRAP_FRAME</span><br><span class="line">.text:000000014014CD2C 00</span><br><span class="line">.text:000000014014CD33 48 8D AC 24 80 00+                lea     rbp, [rsp+arg_78] ; rbp &#x3D; _KTRAP_FRAME + 0x80</span><br><span class="line">.text:000000014014CD33 00 00</span><br><span class="line">.text:000000014014CD3B 48 89 9D C0 00 00+                mov     [rbp+0C0h], rbx ; rbx</span><br><span class="line">.text:000000014014CD3B 00</span><br><span class="line">.text:000000014014CD42 48 89 BD C8 00 00+                mov     [rbp+0C8h], rdi ; rdi</span><br><span class="line">.text:000000014014CD42 00</span><br><span class="line">.text:000000014014CD49 48 89 B5 D0 00 00+                mov     [rbp+0D0h], rsi ; rsi</span><br><span class="line">.text:000000014014CD49 00</span><br><span class="line">.text:000000014014CD50</span><br><span class="line">.text:000000014014CD50                   KiSystemServiceUser:                    ; DATA XREF: KiSystemService+2F↑o</span><br><span class="line">.text:000000014014CD50 C6 45 AB 02                       mov     byte ptr [rbp-55h], 2 ; ExceptionActive &#x3D; 2</span><br></pre></td></tr></table></figure>
+
+<h3 id="KiSystemService"><a href="#KiSystemService" class="headerlink" title="KiSystemService"></a>KiSystemService</h3><p>KiSystemCall64的阉割版</p>
+<p>ss eflags cs rip 已经在中断时保存，rsp通过TSS取得</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">.text:000000014014CA00                   KiSystemService proc near               ; DATA XREF: .pdata:00000001403447E8↓o</span><br><span class="line">.text:000000014014CA00                                                           ; INITDATA:0000000140716308↓o</span><br><span class="line">.text:000000014014CA00</span><br><span class="line">.text:000000014014CA00                   var_E8          &#x3D; byte ptr -0E8h</span><br><span class="line">.text:000000014014CA00</span><br><span class="line">.text:000000014014CA00 0F 01 F8                          swapgs                  ; Exchange GS base with KernelGSBase MSR</span><br><span class="line">.text:000000014014CA03 49 8B CA                          mov     rcx, r10</span><br><span class="line">.text:000000014014CA06 48 83 EC 08                       sub     rsp, 8          ; Integer Subtraction</span><br><span class="line">.text:000000014014CA0A 55                                push    rbp</span><br><span class="line">.text:000000014014CA0B 48 81 EC 58 01 00+                sub     rsp, 158h       ; Integer Subtraction</span><br><span class="line">.text:000000014014CA0B 00</span><br><span class="line">.text:000000014014CA12 48 8D AC 24 80 00+                lea     rbp, [rsp+168h+var_E8] ; 80h</span><br><span class="line">.text:000000014014CA12 00 00</span><br><span class="line">.text:000000014014CA1A 48 89 9D C0 00 00+                mov     [rbp+0C0h], rbx</span><br><span class="line">.text:000000014014CA1A 00</span><br><span class="line">.text:000000014014CA21 48 89 BD C8 00 00+                mov     [rbp+0C8h], rdi</span><br><span class="line">.text:000000014014CA21 00</span><br><span class="line">.text:000000014014CA28 48 89 B5 D0 00 00+                mov     [rbp+0D0h], rsi</span><br><span class="line">.text:000000014014CA28 00</span><br><span class="line">.text:000000014014CA2F 4C 8D 1D 1A 03 00+                lea     r11, KiSystemServiceUser ; ExceptionActive &#x3D; 2</span><br><span class="line">.text:000000014014CA2F 00</span><br><span class="line">.text:000000014014CA36 41 FF E3                          jmp     r11             ; Indirect Near Jump</span><br><span class="line">.text:000000014014CA39                   ; ---------------------------------------------------------------------------</span><br><span class="line">.text:000000014014CA39 C3                                retn                    ; Return Near from Procedure</span><br><span class="line">.text:000000014014CA39                   KiSystemService endp</span><br></pre></td></tr></table></figure>
+
+<p>关于后面的分析需要提前知道下面两个东西</p>
+<h2 id="系统服务表"><a href="#系统服务表" class="headerlink" title="系统服务表"></a>系统服务表</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">SYSTEM_SERVICE_TABLE</span>&#123;</span></span><br><span class="line">    PVOID ServiceTableBase;<span class="comment">//地址表</span></span><br><span class="line">    PVOID ServiceCounterTableBase;<span class="comment">//该表被访问次数</span></span><br><span class="line">    ULONGLONG NumberOfServices;<span class="comment">//函数个数</span></span><br><span class="line">    PVOID ParamTableBase;<span class="comment">//参数个数表</span></span><br><span class="line">&#125; SYSTEM_SERVICE_TABLE, *PSYSTEM_SERVICE_TABLE;</span><br></pre></td></tr></table></figure>
+
+<h2 id="SSDT"><a href="#SSDT" class="headerlink" title="SSDT"></a>SSDT</h2><p>SSDT全称为System Service Descriptor Table，系统服务描述表</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">kd&gt; dq nt!KeServiceDescriptorTable</span><br><span class="line">fffff802&#96;6f3fe780  fffff802&#96;6f341150 00000000&#96;00000000</span><br><span class="line">fffff802&#96;6f3fe790  00000000&#96;000001bc fffff802&#96;6f341f34</span><br><span class="line">fffff802&#96;6f3fe7a0  00000000&#96;00000000 00000000&#96;00000000</span><br><span class="line">fffff802&#96;6f3fe7b0  00000000&#96;00000000 00000000&#96;00000000</span><br><span class="line"></span><br><span class="line">kd&gt; dq nt!KeServiceDescriptorTableShadow</span><br><span class="line">fffff802&#96;6f3fe740  fffff802&#96;6f341150 00000000&#96;00000000</span><br><span class="line">fffff802&#96;6f3fe750  00000000&#96;000001bc fffff802&#96;6f341f34</span><br><span class="line">fffff802&#96;6f3fe760  fffff961&#96;efd89000 00000000&#96;00000000</span><br><span class="line">fffff802&#96;6f3fe770  00000000&#96;0000046f fffff961&#96;efd8b7ec</span><br></pre></td></tr></table></figure>
+
+<p>在xp中SSDT有4个表，后面3个都是空的，这里盲猜有2个表</p>
+<p>SSDT中包含ntoskrl中的函数，SSDT Shadow中额外包含win32k中的函数</p>
+<h2 id="KiSystemServiceUser"><a href="#KiSystemServiceUser" class="headerlink" title="KiSystemServiceUser"></a>KiSystemServiceUser</h2><p>可以看到不管是中断还是快速调用都会跳到KiSystemServiceUser</p>
+<p>这里主要判断是否处于调试模式，如果是则保存调试相关寄存器Dr0-Dr7等一系列操作，如果不是则继续</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">.text:000000014014CD50                   KiSystemServiceUser:                    ; DATA XREF: KiSystemService+2F↑o</span><br><span class="line">.text:000000014014CD50 C6 45 AB 02                       mov     byte ptr [rbp-55h], 2 ; ExceptionActive &#x3D; 2</span><br><span class="line">.text:000000014014CD54 65 48 8B 1C 25 88+                mov     rbx, gs:188h    ; _KTHREAD</span><br><span class="line">.text:000000014014CD54 01 00 00</span><br><span class="line">.text:000000014014CD5D 0F 0D 8B 90 00 00+                prefetchw byte ptr [rbx+90h] ; Trap_Frame</span><br><span class="line">.text:000000014014CD5D 00</span><br><span class="line">.text:000000014014CD64 0F AE 5D AC                       stmxcsr dword ptr [rbp-54h] ; Trap_Frame.MxCsr</span><br><span class="line">.text:000000014014CD68 65 0F AE 14 25 80+                ldmxcsr dword ptr gs:180h ; KPCRB.MxCsr</span><br><span class="line">.text:000000014014CD68 01 00 00</span><br><span class="line">.text:000000014014CD71 80 7B 03 00                       cmp     byte ptr [rbx+3], 0 ; DebugActive</span><br><span class="line">.text:000000014014CD75 66 C7 85 80 00 00+                mov     word ptr [rbp+80h], 0 ; Dr7 &#x3D; 0</span><br><span class="line">.text:000000014014CD75 00 00 00</span><br><span class="line">.text:000000014014CD7E 0F 84 9A 00 00 00                 jz      loc_14014CE1E   ; 不处于调试就跳转</span><br><span class="line">.text:000000014014CD84 48 89 45 B0                       mov     [rbp-50h], rax</span><br><span class="line">.text:000000014014CD88 48 89 4D B8                       mov     [rbp-48h], rcx</span><br><span class="line">.text:000000014014CD8C 48 89 55 C0                       mov     [rbp-40h], rdx</span><br><span class="line">.text:000000014014CD90 F6 43 03 03                       test    byte ptr [rbx+3], 3 ; Logical Compare</span><br><span class="line">.text:000000014014CD94 4C 89 45 C8                       mov     [rbp-38h], r8</span><br><span class="line">.text:000000014014CD98 4C 89 4D D0                       mov     [rbp-30h], r9</span><br><span class="line">.text:000000014014CD9C 74 05                             jz      short loc_14014CDA3 ; Jump if Zero (ZF&#x3D;1)</span><br><span class="line">.text:000000014014CD9E E8 AD 5E FF FF                    call    KiSaveDebugRegisterState ; Call Procedure</span><br></pre></td></tr></table></figure>
+
+<p>这里首先保存FirstArgument SystemCallNumber TrapFrame</p>
+<p>然后判断SystemCallNumber的第13位是否为1，如果是则是一个win32k调用走SSDT Shadow</p>
+<p>接着获取SSDT中的函数地址表，在64位系统中这里并不是真正的地址而是需要经过一段计算FunAddr = ssdt[0] + *(ssdt[0]+4 * Index) &gt;&gt; 4</p>
+<p>经过一些判断后最终跳转到KiSystemServiceCopyEnd</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></td><td class="code"><pre><span class="line">.text:000000014014CE1E                   loc_14014CE1E:                          ; CODE XREF: KiSystemCall64+7E↑j</span><br><span class="line">.text:000000014014CE1E FB                                sti                     ; Set Interrupt Flag</span><br><span class="line">.text:000000014014CE1F 48 89 8B 88 00 00+                mov     [rbx+88h], rcx  ; FirstArgument</span><br><span class="line">.text:000000014014CE1F 00</span><br><span class="line">.text:000000014014CE26 89 83 80 00 00 00                 mov     [rbx+80h], eax  ; SystemCallNumber</span><br><span class="line">.text:000000014014CE2C 0F 1F 40 00                       nop     dword ptr [rax+00h] ; No Operation</span><br><span class="line">.text:000000014014CE30</span><br><span class="line">.text:000000014014CE30                   KiSystemServiceStart:                   ; DATA XREF: KiServiceInternal+5A↑o</span><br><span class="line">.text:000000014014CE30                                                           ; .data:00000001402C4338↓o</span><br><span class="line">.text:000000014014CE30 48 89 A3 90 00 00+                mov     [rbx+90h], rsp  ; TrapFrame</span><br><span class="line">.text:000000014014CE30 00</span><br><span class="line">.text:000000014014CE37 8B F8                             mov     edi, eax</span><br><span class="line">.text:000000014014CE39 C1 EF 07                          shr     edi, 7          ; Shift Logical Right</span><br><span class="line">.text:000000014014CE3C 83 E7 20                          and     edi, 20h        ; Logical AND</span><br><span class="line">.text:000000014014CE3F 25 FF 0F 00 00                    and     eax, 0FFFh      ; Logical AND</span><br><span class="line">.text:000000014014CE44</span><br><span class="line">.text:000000014014CE44                   KiSystemServiceRepeat:                  ; CODE XREF: KiSystemCall64+490↓j</span><br><span class="line">.text:000000014014CE44 4C 8D 15 35 29 23+                lea     r10, KeServiceDescriptorTable ; Load Effective Address</span><br><span class="line">.text:000000014014CE44 00</span><br><span class="line">.text:000000014014CE4B 4C 8D 1D EE 28 23+                lea     r11, KeServiceDescriptorTableShadow ; Load Effective Address</span><br><span class="line">.text:000000014014CE4B 00</span><br><span class="line">.text:000000014014CE52 F7 43 78 40 00 00+                test    dword ptr [rbx+78h], 40h ; KTHREAD.GuiThread</span><br><span class="line">.text:000000014014CE52 00</span><br><span class="line">.text:000000014014CE59 4D 0F 45 D3                       cmovnz  r10, r11        ; Move if Not Zero (ZF&#x3D;0)</span><br><span class="line">.text:000000014014CE5D 42 3B 44 17 10                    cmp     eax, [rdi+r10+10h] ; typedef struct _SYSTEM_SERVICE_TABLE&#123;</span><br><span class="line">.text:000000014014CE5D                                                           ;     PVOID ServiceTableBase;&#x2F;&#x2F;地址表</span><br><span class="line">.text:000000014014CE5D                                                           ;     PVOID ServiceCounterTableBase;&#x2F;&#x2F;该表被访问次数</span><br><span class="line">.text:000000014014CE5D                                                           ;     ULONGLONG NumberOfServices;&#x2F;&#x2F;函数个数</span><br><span class="line">.text:000000014014CE5D                                                           ;     PVOID ParamTableBase;&#x2F;&#x2F;参数个数表</span><br><span class="line">.text:000000014014CE5D                                                           ; &#125; SYSTEM_SERVICE_TABLE, *PSYSTEM_SERVICE_TABLE;</span><br><span class="line">.text:000000014014CE62 0F 83 EF 02 00 00                 jnb     loc_14014D157   ; Jump if Not Below (CF&#x3D;0)</span><br><span class="line">.text:000000014014CE68 4E 8B 14 17                       mov     r10, [rdi+r10]</span><br><span class="line">.text:000000014014CE6C 4D 63 1C 82                       movsxd  r11, dword ptr [r10+rax*4] ; 64位下需要计算得到真实的地址FunAddr &#x3D;ssdt[0] + *(ssdt[0]+4 * Index)&gt;&gt;4</span><br><span class="line">.text:000000014014CE70 49 8B C3                          mov     rax, r11</span><br><span class="line">.text:000000014014CE73 49 C1 FB 04                       sar     r11, 4          ; Shift Arithmetic Right</span><br><span class="line">.text:000000014014CE77 4D 03 D3                          add     r10, r11        ; Add</span><br><span class="line">.text:000000014014CE7A 83 FF 20                          cmp     edi, 20h ; &#39; &#39;  ; Compare Two Operands</span><br><span class="line">.text:000000014014CE7D 75 51                             jnz     short loc_14014CED0 ; Jump if Not Zero (ZF&#x3D;0)</span><br><span class="line">.text:000000014014CE7F 4C 8B 9B F0 00 00+                mov     r11, [rbx+0F0h] ; teb</span><br><span class="line">.text:000000014014CE7F 00</span><br><span class="line">.text:000000014014CE86</span><br><span class="line">.text:000000014014CE86                   KiSystemServiceGdiTebAccess:            ; DATA XREF: KiSystemServiceHandler+D↑o</span><br><span class="line">.text:000000014014CE86 41 83 BB 40 17 00+                cmp     dword ptr [r11+1740h], 0 ; teb.GdiBatchCount</span><br><span class="line">.text:000000014014CE86 00 00</span><br><span class="line">.text:000000014014CE8E 74 40                             jz      short loc_14014CED0 ; Jump if Zero (ZF&#x3D;1)</span><br><span class="line">.text:000000014014CE90 48 89 45 B0                       mov     [rbp-50h], rax</span><br><span class="line">.text:000000014014CE94 48 89 4D B8                       mov     [rbp-48h], rcx</span><br><span class="line">.text:000000014014CE98 48 89 55 C0                       mov     [rbp-40h], rdx</span><br><span class="line">.text:000000014014CE9C 49 8B D8                          mov     rbx, r8</span><br><span class="line">.text:000000014014CE9F 49 8B F9                          mov     rdi, r9</span><br><span class="line">.text:000000014014CEA2 49 8B F2                          mov     rsi, r10</span><br><span class="line">.text:000000014014CEA5 B9 07 00 00 00                    mov     ecx, 7</span><br><span class="line">.text:000000014014CEAA 33 D2                             xor     edx, edx        ; Logical Exclusive OR</span><br><span class="line">.text:000000014014CEAC 4D 33 C0                          xor     r8, r8          ; Logical Exclusive OR</span><br><span class="line">.text:000000014014CEAF 4D 33 C9                          xor     r9, r9          ; Logical Exclusive OR</span><br><span class="line">.text:000000014014CEB2 E8 E9 0F 2D 00                    call    PsInvokeWin32Callout ; Call Procedure</span><br><span class="line">.text:000000014014CEB7 48 8B 45 B0                       mov     rax, [rbp-50h]</span><br><span class="line">.text:000000014014CEBB 48 8B 4D B8                       mov     rcx, [rbp-48h]</span><br><span class="line">.text:000000014014CEBF 48 8B 55 C0                       mov     rdx, [rbp-40h]</span><br><span class="line">.text:000000014014CEC3 4C 8B C3                          mov     r8, rbx</span><br><span class="line">.text:000000014014CEC6 4C 8B CF                          mov     r9, rdi</span><br><span class="line">.text:000000014014CEC9 4C 8B D6                          mov     r10, rsi</span><br><span class="line">.text:000000014014CECC 0F 1F 40 00                       nop     dword ptr [rax+00h] ; No Operation</span><br><span class="line">.text:000000014014CED0</span><br><span class="line">.text:000000014014CED0                   loc_14014CED0:                          ; CODE XREF: KiSystemCall64+17D↑j</span><br><span class="line">.text:000000014014CED0                                                           ; KiSystemCall64+18E↑j</span><br><span class="line">.text:000000014014CED0 83 E0 0F                          and     eax, 0Fh        ; Logical AND</span><br><span class="line">.text:000000014014CED3 0F 84 B7 00 00 00                 jz      KiSystemServiceCopyEnd ; Jump if Zero (ZF&#x3D;1)</span><br><span class="line">.text:000000014014CED9 C1 E0 03                          shl     eax, 3          ; Shift Logical Left</span><br><span class="line">.text:000000014014CEDC 48 8D 64 24 90                    lea     rsp, [rsp-70h]  ; Load Effective Address</span><br><span class="line">.text:000000014014CEE1 48 8D 7C 24 18                    lea     rdi, [rsp+70h+var_58] ; Load Effective Address</span><br><span class="line">.text:000000014014CEE6 48 8B B5 00 01 00+                mov     rsi, [rbp+100h] ; rsp</span><br><span class="line">.text:000000014014CEE6 00</span><br><span class="line">.text:000000014014CEED 48 8D 76 20                       lea     rsi, [rsi+20h]  ; Load Effective Address</span><br><span class="line">.text:000000014014CEF1 F6 85 F0 00 00 00+                test    byte ptr [rbp+0F0h], 1 ; cs</span><br><span class="line">.text:000000014014CEF1 01</span><br><span class="line">.text:000000014014CEF8 74 16                             jz      short loc_14014CF10 ; Jump if Zero (ZF&#x3D;1)</span><br><span class="line">.text:000000014014CEFA 48 3B 35 FF 22 23+                cmp     rsi, cs:MmUserProbeAddress ; 用户态最大地址</span><br><span class="line">.text:000000014014CEFA 00</span><br><span class="line">.text:000000014014CF01 48 0F 43 35 F7 22+                cmovnb  rsi, cs:MmUserProbeAddress ; Move if Not Below (CF&#x3D;0)</span><br><span class="line">.text:000000014014CF01 23 00</span><br><span class="line">.text:000000014014CF09 0F 1F 80 00 00 00+                nop     dword ptr [rax+00000000h] ; No Operation</span><br><span class="line">.text:000000014014CF09 00</span><br><span class="line">.text:000000014014CF10</span><br><span class="line">.text:000000014014CF10                   loc_14014CF10:                          ; CODE XREF: KiSystemCall64+1F8↑j</span><br><span class="line">.text:000000014014CF10 4C 8D 1D 79 00 00+                lea     r11, KiSystemServiceCopyEnd ; Load Effective Address</span><br><span class="line">.text:000000014014CF10 00</span><br><span class="line">.text:000000014014CF17 4C 2B D8                          sub     r11, rax        ; Integer Subtraction</span><br><span class="line">.text:000000014014CF1A 41 FF E3                          jmp     r11             ; Indirect Near Jump</span><br></pre></td></tr></table></figure>
+
+<p>KiSystemServiceCopyEnd:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">.text:000000014014CF90                   KiSystemServiceCopyEnd:                 ; CODE XREF: KiSystemCall64+1D3↑j</span><br><span class="line">.text:000000014014CF90                                                           ; DATA XREF: KiSystemServiceHandler+27↑o</span><br><span class="line">.text:000000014014CF90                                                           ; KiSystemCall64:loc_14014CF10↑o</span><br><span class="line">.text:000000014014CF90 F7 05 EE 22 23 00+                test    dword ptr cs:PerfGlobalGroupMask+8, 40h ; Logical Compare</span><br><span class="line">.text:000000014014CF90 40 00 00 00</span><br><span class="line">.text:000000014014CF9A 0F 85 55 02 00 00                 jnz     loc_14014D1F5   ; Jump if Not Zero (ZF&#x3D;0)</span><br><span class="line">.text:000000014014CFA0 41 FF D2                          call    r10             ; Indirect Call Near Procedure</span><br><span class="line">.text:000000014014CFA3</span><br><span class="line">.text:000000014014CFA3                   loc_14014CFA3:                          ; CODE XREF: KiSystemCall64+54A↓j</span><br><span class="line">.text:000000014014CFA3 65 FF 04 25 38 2E+                inc     dword ptr gs:2E38h ; KeSystemCalls</span><br><span class="line">.text:000000014014CFA3 00 00</span><br><span class="line">.text:000000014014CFAB</span><br><span class="line">.text:000000014014CFAB                   KiSystemServiceExit:                    ; CODE XREF: KiSystemCall64+B2↑j</span><br></pre></td></tr></table></figure>
+
+<h1 id="进程与线程"><a href="#进程与线程" class="headerlink" title="进程与线程"></a>进程与线程</h1><h2 id="EPROCESS进程结构体"><a href="#EPROCESS进程结构体" class="headerlink" title="EPROCESS进程结构体"></a>EPROCESS进程结构体</h2><p>每个windows进程在0环都有一个对应的结构体：EPROCESS，这个结构体包含了进程所有重要的信息。</p>
+<h3 id="KPROCESS"><a href="#KPROCESS" class="headerlink" title="KPROCESS"></a>KPROCESS</h3><ul>
+<li>Header :_DISPATCHER_HEADER <ul>
+<li>内核对象结构体带有此字段即为可等待对象，比如Mutex互斥体，Event事件登（WaitForSingleObject）</li>
+</ul>
+</li>
+<li>DirectoryTableBase<ul>
+<li>页目录表的基址，进程切换时就是使用另外的一个进程的该字段填入CR3中</li>
+</ul>
+</li>
+<li>KernelTime/UserTime<ul>
+<li>统计信息，记录一个进程在内核模式/用户模式下所花的时间</li>
+</ul>
+</li>
+<li>Affinity<ul>
+<li>规定进程里的所有线程能在哪个CPU上跑，如果值为1，那么只能在0号CPU上跑(00000001)；如果值为3，那么可以在0、1号CPU上跑（00000011）</li>
+</ul>
+</li>
+<li>BasePriority<ul>
+<li>基础优先级或最低优先级，该进程中的所有线程最起码的优先级</li>
+</ul>
+</li>
+</ul>
+<h3 id="EPROCESS其他成员"><a href="#EPROCESS其他成员" class="headerlink" title="EPROCESS其他成员"></a>EPROCESS其他成员</h3><ul>
+<li>CreateTime/ExitTime<ul>
+<li>进程的创建，退出时间</li>
+</ul>
+</li>
+<li>UniqueProcessId<ul>
+<li>PID</li>
+</ul>
+</li>
+<li>ActiveProcessLinks<ul>
+<li>双向链表，所有轰动滚成都连接在一起构成的一个链表，对其解链可以达到隐藏进程的目的。PsActiveProcessHead指向全局链表头</li>
+</ul>
+</li>
+<li>QuetaUsage/QuotaPeak<ul>
+<li>物理页相关的统计信息</li>
+</ul>
+</li>
+<li>CommitCharge/PeakVirtualSize/VirtualSize<ul>
+<li>虚拟内存相关的统计信息</li>
+</ul>
+</li>
+<li>VadRoot<ul>
+<li>平衡二叉树，标识0-2G用户空间哪些地址被分配，模块隐藏相关</li>
+</ul>
+</li>
+<li>DebugPort/ExceptionPort<ul>
+<li>调试相关，调试器和被调试程序的桥梁进行通信</li>
+</ul>
+</li>
+<li>ObjectTable<ul>
+<li>句柄表，反调试：查询其他进程的句柄表，若发现自身的EPROCESS则说明该进程正在对我调试</li>
+</ul>
+</li>
+<li>ImageFileName<ul>
+<li>进程镜像文件名，最多16字节</li>
+</ul>
+</li>
+<li>ActiveThreads<ul>
+<li>活动线程的数量</li>
+</ul>
+</li>
+<li>PEB<ul>
+<li>参考 潘爱民老师《windows内核原理与实现》第三章</li>
+<li>BeingDebugged</li>
+<li>LDR 进程模块信息，模块链表</li>
+</ul>
+</li>
+</ul>
+<h2 id="ETHREAD-线程结构体"><a href="#ETHREAD-线程结构体" class="headerlink" title="ETHREAD 线程结构体"></a>ETHREAD 线程结构体</h2><h3 id="KTHREAD"><a href="#KTHREAD" class="headerlink" title="KTHREAD"></a>KTHREAD</h3><ul>
+<li>Header :_DISPATCHER_HEADER<ul>
+<li>内核对象结构体带有此字段即为可等待对象，比如Mutex互斥体，Event事件登（WaitForSingleObject）</li>
+</ul>
+</li>
+<li>InitialStack，StackLimit，KernelStack<ul>
+<li>线程切换相关，将此字段赋值给TSS储存0环栈</li>
+</ul>
+</li>
+<li>Teb<ul>
+<li>Thread Environment Block 线程环境块，三环FS:[0] -&gt; TEB，在其中可以找到PEB</li>
+</ul>
+</li>
+<li>DebugActive<ul>
+<li>如果被调试就不是-1，如果是-1，则不能使用调试寄存器Dr0-Dr7</li>
+</ul>
+</li>
+<li>ApcState,ApcQueueLock,ApcStatePointer,SavedApcState<ul>
+<li>APC相关</li>
+</ul>
+</li>
+<li>State<ul>
+<li>线程状态：就绪、等待还是运行</li>
+</ul>
+</li>
+<li>BasePriority<ul>
+<li>初始值是所属进程的BasePriority的值(KPROCESS-&gt;BasePriority)，以后可以通过KeSetBasePriorityThread()函数重新设定</li>
+</ul>
+</li>
+<li>WaitBlock<ul>
+<li>等待哪个对象（WaitForSingleObject）</li>
+</ul>
+</li>
+<li>ServiceTable<ul>
+<li>指向系统服务表基址</li>
+</ul>
+</li>
+<li>TrapFrame<ul>
+<li>进-0环时保存环境</li>
+</ul>
+</li>
+<li>PreviousMode<ul>
+<li>某些内核函数会判断程序是0环跳动哈斯hi3环调用的</li>
+</ul>
+</li>
+<li>ThreadListEntry<ul>
+<li>双向链表，一个进程所有的线程都处在一个链表中，一共有两个这样的链表，EPROCESS中同样有</li>
+</ul>
+</li>
+</ul>
+<h3 id="ETHREAD其他成员"><a href="#ETHREAD其他成员" class="headerlink" title="ETHREAD其他成员"></a>ETHREAD其他成员</h3><ul>
+<li>Cid<ul>
+<li>当前线程的ID和当前进程PID，进程隐藏相关</li>
+</ul>
+</li>
+<li>ThreadsProcess<ul>
+<li>指向自己所属的进程EPROCESS，进程隐藏相关</li>
+</ul>
+</li>
+<li>ThreadListEntry<ul>
+<li>双向链表，一个进程所有的线程都处在一个链表中，一共有两个这样的链表，EPROCESS中同样有</li>
+</ul>
+</li>
+</ul>
+<h2 id="KPCR-CPU控制区（Processor-Control-Rregion）"><a href="#KPCR-CPU控制区（Processor-Control-Rregion）" class="headerlink" title="KPCR CPU控制区（Processor Control Rregion）"></a>KPCR CPU控制区（Processor Control Rregion）</h2><ul>
+<li>当线程进入0环时，FS:[0]指向KPCR（3环时指向TEB）</li>
+<li>每个CPU都有一个KPCR结构体（一个核心一个）</li>
+<li>KPCR中储存了CPU本身要用的一些重要数据：GDT、IDT、以及线程相关的一些信息</li>
+</ul>
+<h3 id="NT-TIB主要成员"><a href="#NT-TIB主要成员" class="headerlink" title="_NT_TIB主要成员"></a>_NT_TIB主要成员</h3><ul>
+<li>ExceptionList<ul>
+<li>储存0环异常处理程序链表SEH，对比TEB中同样有这个结构储存3环异常处理程序链表SEh</li>
+</ul>
+</li>
+<li>StackBase，StackLimit<ul>
+<li>0环线程栈底和栈大小</li>
+</ul>
+</li>
+<li>Self<ul>
+<li>指向TIB自身</li>
+</ul>
+</li>
+</ul>
+<h3 id="KPCR其他成员"><a href="#KPCR其他成员" class="headerlink" title="KPCR其他成员"></a>KPCR其他成员</h3><ul>
+<li>SelfPcr<ul>
+<li>指向自己，方便寻址</li>
+</ul>
+</li>
+<li>Prcb<ul>
+<li>指向拓展结构体PRCB</li>
+</ul>
+</li>
+<li>IDT<ul>
+<li>IDT表基址</li>
+</ul>
+</li>
+<li>GDT<ul>
+<li>GDT表基址</li>
+</ul>
+</li>
+<li>TSS<ul>
+<li>指向TSS，每个CPU都有一个TSS</li>
+</ul>
+</li>
+<li>Number<ul>
+<li>CPU编号</li>
+</ul>
+</li>
+<li>PrcbData：_KPRCB<ul>
+<li>拓展结构体</li>
+</ul>
+</li>
+</ul>
+<h3 id="KPRCB"><a href="#KPRCB" class="headerlink" title="KPRCB"></a>KPRCB</h3><ul>
+<li>CurrentThread<ul>
+<li>当前CPU正在跑的线程</li>
+</ul>
+</li>
+<li>NextThread<ul>
+<li>下一个切换的线程</li>
+</ul>
+</li>
+<li>IdleThread<ul>
+<li>空闲线程，如果没有要跑的线程，就跑这个空闲线程</li>
+</ul>
+</li>
+</ul>
+<h2 id="等待链表、调度链表"><a href="#等待链表、调度链表" class="headerlink" title="等待链表、调度链表"></a>等待链表、调度链表</h2><p>在进程中对线程链表进行断链，OD等调试器查询不到该线程，但线程仍然在跑。说明两个问题，OD查询线程使用的API是通过线程链表去查询的；CPU在调度线程执行的时候不是使用这个链表。</p>
+<p>线程有3仲状态：</p>
+<ul>
+<li>运行</li>
+<li>就绪</li>
+<li>阻塞</li>
+</ul>
+<h3 id="等待链表"><a href="#等待链表" class="headerlink" title="等待链表"></a>等待链表</h3><p>KiWaitListHead 双向链表指向KTHREAD.WaitListEntry，线程调用Sleep()或者WaitForSingleObject()等函数时，就插入这个链表</p>
+<h3 id="33个链表"><a href="#33个链表" class="headerlink" title="33个链表"></a>33个链表</h3><p>处于运行状态的链表在KPCR中，就绪和等待全在另外33个链表中，1个等待链表，32个就绪链表</p>
+<h3 id="调度（就绪）链表"><a href="#调度（就绪）链表" class="headerlink" title="调度（就绪）链表"></a>调度（就绪）链表</h3><p>KiDispatcherReadyListHead 存储32个双向链表的链表头，按优先级为下标排序</p>
+<h3 id="版本差异"><a href="#版本差异" class="headerlink" title="版本差异"></a>版本差异</h3><p>32位只有33个双向链表，多喝也只有一个</p>
+<p>64位有64个</p>
+<p>服务器版本：KiWaitListHead只有一个，但KiDispatcherReadyListHead这个数组有几个CPU就有几组</p>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"787cc455593c1fb9cfcd","clientSecret":"f6abba3d9cc77878426ee16aa8bcb980fd3cd70c","repo":"s1vona.github.io","owner":"s1vona","admin":["s1vona"],"distractionFreeMode":true};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Sivona</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2020 <a href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Enforce justice on behalf of Heaven.</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E6%BB%B4%E6%B0%B4%E9%80%86%E5%90%91/"># 滴水逆向</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2020/11/08/2020%E5%A4%AA%E6%B9%96%E6%9D%AFwp/">2020太湖杯wp</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Sivona | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+    <div>
+        友情链接: 
+       <div>
+        <a class="theme-link"  href="https://sncker.github.io" target="_blank" rel="noopener"> SNCKER's blog </a><span>&nbsp;&nbsp;</span>
+        <a class="theme-link"  href="https://www.cnblogs.com/lnjoy/" target="_blank" rel="noopener"> EnJoy_July 's blog' </a><span>&nbsp;&nbsp;</span>
+       </div>
+       
+      </div>
+</footer>
+
+    </div>
+</body>
+</html>
