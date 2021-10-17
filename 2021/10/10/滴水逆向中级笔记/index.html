@@ -467,7 +467,16 @@
 <blockquote>
 <p>利用1、2组表缓存不同步绕过crc校验？</p>
 </blockquote>
-<h2 id="中断与异常"><a href="#中断与异常" class="headerlink" title="中断与异常"></a>中断与异常</h2><h1 id="系统调用"><a href="#系统调用" class="headerlink" title="系统调用"></a>系统调用</h1><h2 id="API-3环进0环"><a href="#API-3环进0环" class="headerlink" title="API 3环进0环"></a>API 3环进0环</h2><h3 id="KUSER-SHARED-DATA"><a href="#KUSER-SHARED-DATA" class="headerlink" title="_KUSER_SHARED_DATA"></a>_KUSER_SHARED_DATA</h3><ul>
+<h2 id="中断与异常"><a href="#中断与异常" class="headerlink" title="中断与异常"></a>中断与异常</h2><ul>
+<li>中断通常是由CPU外部的输入输出设备（硬件）所触发的，供外部设备通知CPU“有事情需要处理”，因此又叫中断请求</li>
+<li>中断请求的目的是虚妄CPU暂时停止执行当前正在执行的程序，转去执行中断请求所对应的中断处理例程（由IDT表决定）</li>
+<li>80x86有两条中断请求线：<ul>
+<li>非屏蔽中断线，称为NMI</li>
+<li>可屏蔽中断线，称为INTR</li>
+</ul>
+</li>
+</ul>
+<h3 id="非可屏蔽中断"><a href="#非可屏蔽中断" class="headerlink" title="非可屏蔽中断"></a>非可屏蔽中断</h3><h1 id="系统调用"><a href="#系统调用" class="headerlink" title="系统调用"></a>系统调用</h1><h2 id="API-3环进0环"><a href="#API-3环进0环" class="headerlink" title="API 3环进0环"></a>API 3环进0环</h2><h3 id="KUSER-SHARED-DATA"><a href="#KUSER-SHARED-DATA" class="headerlink" title="_KUSER_SHARED_DATA"></a>_KUSER_SHARED_DATA</h3><ul>
 <li>用于用户态和内核态共享数据</li>
 </ul>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">.text:000000018009CE20 4C 8B D1                          mov     r10, rcx        ; NtReadFile</span><br><span class="line">.text:000000018009CE23 B8 06 00 00 00                    mov     eax, 6</span><br><span class="line">.text:000000018009CE28 F6 04 25 08 03 FE+                test    byte ptr ds:7FFE0308h, 1 ; 判断CPU是否支持快速系统调用</span><br><span class="line">.text:000000018009CE28 7F 01</span><br><span class="line">.text:000000018009CE30 75 03                             jnz     short loc_18009CE35 ; Jump if Not Zero (ZF&#x3D;0)</span><br><span class="line">.text:000000018009CE32 0F 05                             syscall                 ; Low latency system call</span><br><span class="line">.text:000000018009CE34 C3                                retn                    ; Return Near from Procedure</span><br><span class="line">.text:000000018009CE35                   ; ---------------------------------------------------------------------------</span><br><span class="line">.text:000000018009CE35</span><br><span class="line">.text:000000018009CE35                   loc_18009CE35:                          ; CODE XREF: NtReadFile+10↑j</span><br><span class="line">.text:000000018009CE35 CD 2E                             int     2Eh             ; DOS 2+ internal - EXECUTE COMMAND</span><br><span class="line">.text:000000018009CE35                                                           ; DS:SI -&gt; counted CR-terminated command string</span><br><span class="line">.text:000000018009CE37 C3                                retn                    ; Return Near from Procedure</span><br></pre></td></tr></table></figure>
