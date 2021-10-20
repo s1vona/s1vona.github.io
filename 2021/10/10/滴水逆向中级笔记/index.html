@@ -1101,7 +1101,14 @@
 <li>线程切换并没有使用TSS来保存寄存器，而是使用堆栈</li>
 <li>线程切换的过程就是堆栈切换的过程</li>
 </ul>
-
+<h3 id="主动切换"><a href="#主动切换" class="headerlink" title="主动切换"></a>主动切换</h3><ul>
+<li>windows中大多情况下通过调用SwapContext函数进行线程切换</li>
+<li>线程切换时会比较是否属于同一进程，如果不是则切换cr3寄存器</li>
+</ul>
+<blockquote>
+<p>如果不调用API，就可以一致占用CPU吗？</p>
+</blockquote>
+<h3 id="时钟中断切换"><a href="#时钟中断切换" class="headerlink" title="时钟中断切换"></a>时钟中断切换</h3><h3 id="时间片管理切换"><a href="#时间片管理切换" class="headerlink" title="时间片管理切换"></a>时间片管理切换</h3>
 <div id="gitalk-container"></div>
 <script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
 
