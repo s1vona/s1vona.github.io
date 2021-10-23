@@ -1108,7 +1108,23 @@
 <blockquote>
 <p>如果不调用API，就可以一致占用CPU吗？</p>
 </blockquote>
-<h3 id="时钟中断切换"><a href="#时钟中断切换" class="headerlink" title="时钟中断切换"></a>时钟中断切换</h3><h3 id="时间片管理切换"><a href="#时间片管理切换" class="headerlink" title="时间片管理切换"></a>时间片管理切换</h3>
+<h3 id="时钟中断切换"><a href="#时钟中断切换" class="headerlink" title="时钟中断切换"></a>时钟中断切换</h3><h3 id="时间片管理切换"><a href="#时间片管理切换" class="headerlink" title="时间片管理切换"></a>时间片管理切换</h3><h3 id="线程切换之TSS"><a href="#线程切换之TSS" class="headerlink" title="线程切换之TSS"></a>线程切换之TSS</h3><p>Intel设计TSS的目的是为了任务切换（线程切换），但Windows与Linux并没有使用，而是采用栈来保存线程的各种寄存器。</p>
+<blockquote>
+<p>一个CPU只有一个TSS（保存在KPCR中），但是线程很多，如何用一个TSS来保存所有线程的ESP0呢？</p>
+</blockquote>
+<p>切换线程时会将从TEB中取出目标线程的esp0 和 cr3 存到TSS中，其他不动</p>
+<h3 id="线程切换之FS"><a href="#线程切换之FS" class="headerlink" title="线程切换之FS"></a>线程切换之FS</h3><p>系统中同时存在许多个线程，这就意味着fs在3环时指向的TEB要有多个（每个线程一个）</p>
+<p>但在实际的使用中我们发现，当我们在3环查看不同线程的FS寄存器时，FS的段选择子都是相同的，那是如何实现通过一个FS寄存器指向多个TEB呢？</p>
+<p>线程切换时会取出目标进程的TEB存入FS段描述符基址中</p>
+<h3 id="线程优先级"><a href="#线程优先级" class="headerlink" title="线程优先级"></a>线程优先级</h3><p>有三种情况会导致线程切换：</p>
+<ul>
+<li>当前线程主动调用API：KiSwapThread KiSwapContext</li>
+<li>当前线程时间片稻妻：KiDispatchInterrupt KiQuantumEnd </li>
+<li>有备用线程（KPCR.PrcbData.NextThread）：KiDispatchInterrupt </li>
+</ul>
+<p>在KiSwapThread与KiQuantumEnd 函数中都是通过KiFindReadyThread来找下一个要切换的线程，那么<code>KiFindReadyThread</code>时根据<code>什么条件</code>来选择下一个要执行的线程呢？</p>
+<p>根据之前说到的KiDispatcherReadyListHead 数组中的双向链表的下标作为优先级进行调度</p>
+<h3 id="进程挂靠"><a href="#进程挂靠" class="headerlink" title="进程挂靠"></a>进程挂靠</h3>
 <div id="gitalk-container"></div>
 <script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
 
